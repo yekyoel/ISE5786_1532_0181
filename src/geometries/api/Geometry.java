@@ -3,14 +3,15 @@ package geometries.api;
 import primitives.Point;
 import primitives.Vector;
 
-/**
- * Interface for all geometric bodies in the rendering engine.
- */
-public interface Geometry {
-    /**
-     * Calculates the normal vector to the geometry at the given point.
-     * @param point the point on the geometry surface
-     * @return the normal vector
-     */
-    Vector getNormal(Point point);
+public abstract class Geometry {
+
+	// At this stage, there is no constructor per your teacher's instructions.
+
+	/**
+	 * Calculates the normal vector to the geometry at a specific point. * @param
+	 * point The point on the geometry's surface.
+	 * 
+	 * @return The normal vector at that point.
+	 */
+	public abstract Vector getNormal(Point point);
 }
