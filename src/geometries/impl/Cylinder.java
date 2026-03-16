@@ -26,6 +26,6 @@ public class Cylinder extends Tube {
 	@Override
 	public Vector getNormal(Point point) {
 		// A cylinder's lateral surface normal equals the tube normal
-		return super.getNormal(point);
+		return null;
 	}
 }

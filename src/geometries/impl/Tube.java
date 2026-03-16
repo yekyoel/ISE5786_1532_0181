@@ -24,10 +24,6 @@ public class Tube extends RadialGeometry {
 
 	@Override
 	public Vector getNormal(Point point) {
-		// normal is the component of (point - axis.origin) orthogonal to axis direction
-		Vector v = point.subtract(_axis.origin());
-		double t = _axis.direction().dotProduct(v);
-		Point o = _axis.origin().add(_axis.direction().scale(t));
-		return point.subtract(o).normalize();
+		return null;
 	}
 }
