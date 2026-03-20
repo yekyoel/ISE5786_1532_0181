@@ -20,10 +20,26 @@ public class Plane extends Geometry {
 	 * @param p2 the second point
 	 * @param p3 the third point
 	 */
+	/*
+	 * public Plane(Point p1, Point p2, Point p3) { i changed this for the unittests
+	 * to work, but it is not correct because the normal is not calculated _point =
+	 * p1; // Calculating the normal using the cross product of two vectors on the
+	 * plane _normal = null; }
+	 */
+
+	/**
+	 * Constructs a plane from three points. * @param p1 the first point
+	 * 
+	 * @param p2 the second point
+	 * @param p3 the third point
+	 */
 	public Plane(Point p1, Point p2, Point p3) {
 		_point = p1;
-		// Calculating the normal using the cross product of two vectors on the plane
-		_normal = null;
+
+		Vector v1 = p2.subtract(p1);
+		Vector v2 = p3.subtract(p1);
+
+		_normal = v1.crossProduct(v2).normalize();
 	}
 
 	/**
