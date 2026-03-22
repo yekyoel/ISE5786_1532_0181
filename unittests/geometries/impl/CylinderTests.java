@@ -15,6 +15,7 @@ class CylinderTests {
 
 	@Test
 	void testGetNormal() {
+		
 		// Cylinder with radius 1, height 2, aligned with the Z-axis
 		Cylinder cyl = new Cylinder(1.0, new Ray(new Point(0, 0, 0), new Vector(0, 0, 1)), 2.0);
 
