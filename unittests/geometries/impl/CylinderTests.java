@@ -13,26 +13,44 @@ import primitives.Vector;
  */
 class CylinderTests {
 
+	/** Default constructor for CylinderTests */
+	CylinderTests() {
+	}
+
 	/** Delta value for accuracy when comparing double values. */
 	private static final double DELTA = 1e-6;
 
 	// ============ Common Geometric Objects ==================
+	/** Origin point for the cylinder axis */
 	private static final Point P0 = new Point(0, 0, 0);
+	/** Direction vector for the cylinder axis */
 	private static final Vector V_Z = new Vector(0, 0, 1);
+	/** Central axis of the cylinder */
 	private static final Ray AXIS = new Ray(P0, V_Z);
+	/** Radius of the cylinder */
 	private static final double RADIUS = 1.0;
+	/** Height of the cylinder */
 	private static final double HEIGHT = 2.0;
 
 	// ============ Common Expected Normals ===================
+	/** Expected normal vector towards X axis */
 	private static final Vector NORMAL_X = new Vector(1, 0, 0);
+	/** Expected normal vector towards Z axis */
 	private static final Vector NORMAL_Z = new Vector(0, 0, 1);
+	/** Expected normal vector towards minus Z axis */
 	private static final Vector NORMAL_MINUS_Z = new Vector(0, 0, -1);
 
 	// ============ Error Messages ============================
+	/** Error message for lateral surface normal */
 	private static final String ERROR_LATERAL = "ERROR: Cylinder lateral surface normal is wrong";
+	/** Error message for top base normal */
 	private static final String ERROR_TOP = "ERROR: Cylinder top base normal is wrong";
+	/** Error message for bottom base normal */
 	private static final String ERROR_BOTTOM = "ERROR: Cylinder bottom base normal is wrong";
 
+	/**
+	 * Test method for {@link geometries.impl.Cylinder#getNormal(primitives.Point)}.
+	 */
 	@Test
 	void testGetNormal() {
 		Cylinder cyl = new Cylinder(RADIUS, AXIS, HEIGHT);

@@ -11,6 +11,13 @@ import primitives.Vector;
  * Unit tests for geometries.impl.Sphere class
  */
 class SphereTests {
+	/** Default constructor for SphereTests */
+	SphereTests() {
+	}
+
+	/**
+	 * Test method for {@link geometries.impl.Sphere#getNormal(primitives.Point)}.
+	 */
 	@Test
 	void testGetNormal() {
 		Sphere sphere = new Sphere(new Point(0, 0, 0), 1d);

@@ -13,21 +13,34 @@ import primitives.Vector;
  */
 class TubeTests {
 
+	/** Default constructor for TubeTests */
+	TubeTests() {
+	}
+
 	/** Delta value for accuracy when comparing double values. */
 	private static final double DELTA = 1e-6;
 
 	// ============ Common Geometric Objects ==================
+	/** Origin point for the tube axis */
 	private static final Point P0 = new Point(0, 0, 0);
+	/** Direction vector for the tube axis */
 	private static final Vector V_Z = new Vector(0, 0, 1);
+	/** Central axis of the tube */
 	private static final Ray AXIS = new Ray(P0, V_Z);
+	/** Radius of the tube */
 	private static final double RADIUS = 1.0;
 
 	// ============ Common Expected Normals ===================
+	/** Expected normal vector towards X axis */
 	private static final Vector NORMAL_X = new Vector(1, 0, 0);
 
 	// ============ Error Messages ============================
+	/** Error message for tube normal */
 	private static final String ERROR_NORMAL = "ERROR: Tube getNormal() wrong result";
 
+	/**
+	 * Test method for {@link geometries.impl.Tube#getNormal(primitives.Point)}.
+	 */
 	@Test
 	void testGetNormal() {
 		Tube tube = new Tube(RADIUS, AXIS);

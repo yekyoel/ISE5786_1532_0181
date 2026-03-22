@@ -14,21 +14,36 @@ import primitives.Vector;
  */
 class PlaneTests {
 
+	/** Default constructor for PlaneTests */
+	PlaneTests() {
+	}
+
 	/** Delta value for accuracy when comparing double values. */
 	private static final double DELTA = 1e-6;
 
 	// ============ Common Geometric Objects ==================
+	/** First vertex of the plane */
 	private static final Point P1 = new Point(0, 0, 1);
+	/** Second vertex of the plane */
 	private static final Point P2 = new Point(1, 0, 0);
+	/** Third vertex of the plane */
 	private static final Point P3 = new Point(0, 1, 0);
 
 	// ============ Error Messages ============================
+	/** Error message for failed construction */
 	private static final String ERROR_CONSTRUCT_FAIL = "Failed constructing a correct plane";
+	/** Error message for coinciding points */
 	private static final String ERROR_CONSTRUCT_COINC = "Constructed a plane with coinciding points";
+	/** Error message for colinear points */
 	private static final String ERROR_CONSTRUCT_LINE = "Constructed a plane with 3 points on the same line";
+	/** Error message for normal length */
 	private static final String ERROR_NORMAL_LENGTH = "ERROR: Plane normal is not a unit vector";
+	/** Error message for mismatched normals */
 	private static final String ERROR_NORMAL_MATCH = "ERROR: Normal at reference point is different from normal at other point";
 
+	/**
+	 * Test method for constructors in {@link geometries.impl.Plane}.
+	 */
 	@Test
 	void testConstructor() {
 		// ============ Equivalence Partitions Tests ==============
@@ -54,6 +69,9 @@ class PlaneTests {
 		assertThrows(IllegalArgumentException.class, () -> new Plane(pLine1, pLine2, pLine3), ERROR_CONSTRUCT_LINE);
 	}
 
+	/**
+	 * Test method for {@link geometries.impl.Plane#getNormal(primitives.Point)}.
+	 */
 	@Test
 	void testGetNormal() {
 		Plane plane = new Plane(P1, P2, P3);
