@@ -19,17 +19,17 @@ class PlaneTests {
 	@Test
 	void testConstructor() {
 		// ============ Equivalence Partitions Tests ==============
-		// TC01: Correct plane construction with 3 points
+		// TC01: Correct plane construction with 3 points.
 		assertDoesNotThrow(() -> new Plane(new Point(0, 0, 1), new Point(1, 0, 0), new Point(0, 1, 0)),
 				"Failed constructing a correct plane");
 
 		// =============== Boundary Values Tests ==================
-		// TC11: 2 points coincide
+		// TC11: 2 points coincide.
 		assertThrows(IllegalArgumentException.class,
 				() -> new Plane(new Point(0, 0, 1), new Point(0, 0, 1), new Point(0, 1, 0)),
 				"Constructed a plane with 2 coinciding points");
 
-		// TC12: 3 points on the same line
+		// TC12: 3 points on the same line.
 		assertThrows(IllegalArgumentException.class,
 				() -> new Plane(new Point(1, 1, 1), new Point(2, 2, 2), new Point(3, 3, 3)),
 				"Constructed a plane with 3 points on the same line");
@@ -45,7 +45,7 @@ class PlaneTests {
 		assertEquals(1, n.length(), DELTA, "ERROR: Plane normal is not a unit vector");
 
 		// =============== Boundary Values Tests ==================
-		// TC11: Normal at the reference point itself
+		// TC11: Normal at the reference point itself.
 		Vector nRef = plane.getNormal(new Point(0, 0, 1));
 		assertEquals(1, nRef.length(), DELTA, "ERROR: Plane normal at reference point is not a unit vector");
 

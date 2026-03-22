@@ -11,7 +11,6 @@ import primitives.Vector;
  * Unit tests for geometries.impl.Sphere class
  */
 class SphereTests {
-
 	@Test
 	void testGetNormal() {
 		Sphere sphere = new Sphere(new Point(0, 0, 0), 1d);

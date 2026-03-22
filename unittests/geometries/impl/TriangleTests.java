@@ -11,7 +11,6 @@ import primitives.Vector;
  * Unit tests for geometries.impl.Triangle class
  */
 class TriangleTests {
-
 	@Test
 	void testGetNormal() {
 		// We create a triangle on the plane parallel to X-Y (z=1)

@@ -12,7 +12,6 @@ import primitives.Vector;
  * Unit tests for geometries.impl.Tube class
  */
 class TubeTests {
-
 	@Test
 	void testGetNormal() {
 		// Tube with radius 1, aligned with the Z-axis

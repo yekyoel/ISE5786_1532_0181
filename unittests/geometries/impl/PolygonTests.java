@@ -59,33 +59,33 @@ class PolygonTests {
 
 		// ============ Equivalence Partitions Tests ==============
 
-		// TC01: Correct convex quadrilateral with vertices in correct order
+		// TC01: Correct convex quadrilateral with vertices in correct order.
 		assertDoesNotThrow(() -> new Polygon(POINT_Z, POINT_X, POINT_Y, POINT1),
 				"Failed constructing a correct polygon");
 
-		// TC02: Wrong vertices order
+		// TC02: Wrong vertices order.
 		assertThrows(IllegalArgumentException.class, () -> new Polygon(POINT_Z, POINT_Y, POINT_X, POINT1),
 				"Constructed a polygon with wrong order of vertices");
 
-		// TC03: Vertices not in the same plane
+		// TC03: Vertices not in the same plane.
 		assertThrows(IllegalArgumentException.class, () -> new Polygon(POINT_Z, POINT_X, POINT_Y, POINT2),
 				"Constructed a polygon with vertices that are not in the same plane");
 
-		// TC04: Concave quadrilateral
+		// TC04: Concave quadrilateral.
 		assertThrows(IllegalArgumentException.class, () -> new Polygon(POINT_Z, POINT_X, POINT_Y, POINT3),
 				"Constructed a concave polygon");
 
 		// =============== Boundary Values Tests ==================
 
-		// TC11: Vertex on a side
+		// TC11: Vertex on a side.
 		assertThrows(IllegalArgumentException.class, () -> new Polygon(POINT_Z, POINT_X, POINT_Y, POINT4),
 				"Constructed a polygon with a vertex on a side");
 
-		// TC12: Last point equals first point
+		// TC12: Last point equals first point.
 		assertThrows(IllegalArgumentException.class, () -> new Polygon(POINT_Z, POINT_X, POINT_Y, POINT_Z),
 				"Constructed a polygon with duplicate first/last vertex");
 
-		// TC13: Co-located points
+		// TC13: Co-located points.
 		assertThrows(IllegalArgumentException.class, () -> new Polygon(POINT_Z, POINT_X, POINT_Y, POINT_Y),
 				"Constructed a polygon with co-located vertices");
 	}
