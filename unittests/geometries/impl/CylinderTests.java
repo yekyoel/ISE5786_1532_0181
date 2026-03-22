@@ -13,33 +13,51 @@ import primitives.Vector;
  */
 class CylinderTests {
 
+	/** Delta value for accuracy when comparing double values. */
+	private static final double DELTA = 1e-6;
+
+	// ============ Common Geometric Objects ==================
+	private static final Point P0 = new Point(0, 0, 0);
+	private static final Vector V_Z = new Vector(0, 0, 1);
+	private static final Ray AXIS = new Ray(P0, V_Z);
+	private static final double RADIUS = 1.0;
+	private static final double HEIGHT = 2.0;
+
+	// ============ Common Expected Normals ===================
+	private static final Vector NORMAL_X = new Vector(1, 0, 0);
+	private static final Vector NORMAL_Z = new Vector(0, 0, 1);
+	private static final Vector NORMAL_MINUS_Z = new Vector(0, 0, -1);
+
+	// ============ Error Messages ============================
+	private static final String ERROR_LATERAL = "ERROR: Cylinder lateral surface normal is wrong";
+	private static final String ERROR_TOP = "ERROR: Cylinder top base normal is wrong";
+	private static final String ERROR_BOTTOM = "ERROR: Cylinder bottom base normal is wrong";
+
 	@Test
 	void testGetNormal() {
-		
-		// Cylinder with radius 1, height 2, aligned with the Z-axis
-		Cylinder cyl = new Cylinder(1.0, new Ray(new Point(0, 0, 0), new Vector(0, 0, 1)), 2.0);
+		Cylinder cyl = new Cylinder(RADIUS, AXIS, HEIGHT);
 
 		// ============ Equivalence Partitions Tests ==============
-		// TC01: Point on the lateral surface (side)
-		assertEquals(new Vector(1, 0, 0), cyl.getNormal(new Point(1, 0, 1)), "ERROR: Cylinder lateral surface normal");
+		// EP01: Point on the lateral surface (side)
+		assertEquals(NORMAL_X, cyl.getNormal(new Point(1, 0, 1)), ERROR_LATERAL);
 
-		// TC02: Point on the top base
-		assertEquals(new Vector(0, 0, 1), cyl.getNormal(new Point(0.5, 0, 2)), "ERROR: Cylinder top base normal");
+		// EP02: Point on the top base
+		assertEquals(NORMAL_Z, cyl.getNormal(new Point(0.5, 0, 2)), ERROR_TOP);
 
-		// TC03: Point on the bottom base
-		assertEquals(new Vector(0, 0, -1), cyl.getNormal(new Point(0.5, 0, 0)), "ERROR: Cylinder bottom base normal");
+		// EP03: Point on the bottom base
+		assertEquals(NORMAL_MINUS_Z, cyl.getNormal(new Point(0.5, 0, 0)), ERROR_BOTTOM);
 
 		// =============== Boundary Values Tests ==================
-		// TC11: Point at the center of the bottom base
-		assertEquals(new Vector(0, 0, -1), cyl.getNormal(new Point(0, 0, 0)), "ERROR: Cylinder bottom center normal");
+		// BV01: Point at the center of the bottom base
+		assertEquals(NORMAL_MINUS_Z, cyl.getNormal(P0), ERROR_BOTTOM);
 
-		// TC12: Point at the center of the top base
-		assertEquals(new Vector(0, 0, 1), cyl.getNormal(new Point(0, 0, 2)), "ERROR: Cylinder top center normal");
+		// BV02: Point at the center of the top base
+		assertEquals(NORMAL_Z, cyl.getNormal(new Point(0, 0, 2)), ERROR_TOP);
 
-		// TC13: Point on the edge of the bottom base (between base and side)
-		assertEquals(new Vector(0, 0, -1), cyl.getNormal(new Point(1, 0, 0)), "ERROR: Cylinder bottom edge normal");
+		// BV03: Point on the edge of the bottom base (between base and side)
+		assertEquals(NORMAL_MINUS_Z, cyl.getNormal(new Point(1, 0, 0)), ERROR_BOTTOM);
 
-		// TC14: Point on the edge of the top base (between base and side)
-		assertEquals(new Vector(0, 0, 1), cyl.getNormal(new Point(1, 0, 2)), "ERROR: Cylinder top edge normal");
+		// BV04: Point on the edge of the top base (between base and side)
+		assertEquals(NORMAL_Z, cyl.getNormal(new Point(1, 0, 2)), ERROR_TOP);
 	}
 }

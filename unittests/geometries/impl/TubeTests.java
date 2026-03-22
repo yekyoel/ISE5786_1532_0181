@@ -12,23 +12,35 @@ import primitives.Vector;
  * Unit tests for geometries.impl.Tube class
  */
 class TubeTests {
+
+	/** Delta value for accuracy when comparing double values. */
+	private static final double DELTA = 1e-6;
+
+	// ============ Common Geometric Objects ==================
+	private static final Point P0 = new Point(0, 0, 0);
+	private static final Vector V_Z = new Vector(0, 0, 1);
+	private static final Ray AXIS = new Ray(P0, V_Z);
+	private static final double RADIUS = 1.0;
+
+	// ============ Common Expected Normals ===================
+	private static final Vector NORMAL_X = new Vector(1, 0, 0);
+
+	// ============ Error Messages ============================
+	private static final String ERROR_NORMAL = "ERROR: Tube getNormal() wrong result";
+
 	@Test
 	void testGetNormal() {
-		// Tube with radius 1, aligned with the Z-axis
-		Tube tube = new Tube(1.0, new Ray(new Point(0, 0, 0), new Vector(0, 0, 1)));
+		Tube tube = new Tube(RADIUS, AXIS);
 
 		// ============ Equivalence Partitions Tests ==============
-		// TC01: Point on the tube, strictly in front of the ray's head (t > 0)
-		assertEquals(new Vector(1, 0, 0), tube.getNormal(new Point(1, 0, 2)),
-				"ERROR: Tube getNormal() wrong result (t > 0)");
+		// EP01: Point on the tube, strictly in front of the ray's head (t > 0)
+		assertEquals(NORMAL_X, tube.getNormal(new Point(1, 0, 2)), ERROR_NORMAL + " (t > 0)");
 
-		// TC02: Point on the tube, strictly behind the ray's head (t < 0)
-		assertEquals(new Vector(1, 0, 0), tube.getNormal(new Point(1, 0, -2)),
-				"ERROR: Tube getNormal() wrong result (t < 0)");
+		// EP02: Point on the tube, strictly behind the ray's head (t < 0)
+		assertEquals(NORMAL_X, tube.getNormal(new Point(1, 0, -2)), ERROR_NORMAL + " (t < 0)");
 
 		// =============== Boundary Values Tests ==================
-		// TC11: Point on the tube, exactly orthogonal to the ray's head (t = 0)
-		assertEquals(new Vector(1, 0, 0), tube.getNormal(new Point(1, 0, 0)),
-				"ERROR: Tube getNormal() wrong result at the ray's head (t = 0)");
+		// BV01: Point on the tube, exactly orthogonal to the ray's head (t = 0)
+		assertEquals(NORMAL_X, tube.getNormal(new Point(1, 0, 0)), ERROR_NORMAL + " at the ray's head (t = 0)");
 	}
 }

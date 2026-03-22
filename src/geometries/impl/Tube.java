@@ -24,10 +24,6 @@ public class Tube extends RadialGeometry {
 		_axis = axis;
 	}
 
-	/*
-	 * @Override public Vector getNormal(Point point) { return null; }
-	 */
-
 	@Override
 	public Vector getNormal(Point point) {
 		Point p0 = _axis.origin();

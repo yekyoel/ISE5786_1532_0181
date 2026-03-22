@@ -21,10 +21,6 @@ public class Sphere extends RadialGeometry {
 		_center = center;
 	}
 
-	/*
-	 * @Override public Vector getNormal(Point point) { return null; }
-	 */
-
 	@Override
 	public Vector getNormal(Point point) {
 		// The normal of a sphere is the vector from the center to the point on the

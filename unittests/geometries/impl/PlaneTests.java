@@ -14,42 +14,61 @@ import primitives.Vector;
  */
 class PlaneTests {
 
-	private static final double DELTA = 0.000001;
+	/** Delta value for accuracy when comparing double values. */
+	private static final double DELTA = 1e-6;
+
+	// ============ Common Geometric Objects ==================
+	private static final Point P1 = new Point(0, 0, 1);
+	private static final Point P2 = new Point(1, 0, 0);
+	private static final Point P3 = new Point(0, 1, 0);
+
+	// ============ Error Messages ============================
+	private static final String ERROR_CONSTRUCT_FAIL = "Failed constructing a correct plane";
+	private static final String ERROR_CONSTRUCT_COINC = "Constructed a plane with coinciding points";
+	private static final String ERROR_CONSTRUCT_LINE = "Constructed a plane with 3 points on the same line";
+	private static final String ERROR_NORMAL_LENGTH = "ERROR: Plane normal is not a unit vector";
+	private static final String ERROR_NORMAL_MATCH = "ERROR: Normal at reference point is different from normal at other point";
 
 	@Test
 	void testConstructor() {
 		// ============ Equivalence Partitions Tests ==============
-		// TC01: Correct plane construction with 3 points.
-		assertDoesNotThrow(() -> new Plane(new Point(0, 0, 1), new Point(1, 0, 0), new Point(0, 1, 0)),
-				"Failed constructing a correct plane");
+		// EP01: Correct plane construction with 3 points
+		assertDoesNotThrow(() -> new Plane(P1, P2, P3), ERROR_CONSTRUCT_FAIL);
+
+		// EP02: Plane(Point, Vector) - Ensure the normal is properly normalized
+		Vector unnormalizedVector = new Vector(0, 2, 0);
+		Plane planeWithVector = new Plane(new Point(1, 2, 3), unnormalizedVector);
+		assertEquals(1.0, planeWithVector.getNormal(new Point(1, 2, 3)).length(), DELTA, ERROR_NORMAL_LENGTH);
 
 		// =============== Boundary Values Tests ==================
-		// TC11: 2 points coincide.
-		assertThrows(IllegalArgumentException.class,
-				() -> new Plane(new Point(0, 0, 1), new Point(0, 0, 1), new Point(0, 1, 0)),
-				"Constructed a plane with 2 coinciding points");
+		// BV01: 2 points coincide
+		assertThrows(IllegalArgumentException.class, () -> new Plane(P1, P1, P3), ERROR_CONSTRUCT_COINC);
 
-		// TC12: 3 points on the same line.
-		assertThrows(IllegalArgumentException.class,
-				() -> new Plane(new Point(1, 1, 1), new Point(2, 2, 2), new Point(3, 3, 3)),
-				"Constructed a plane with 3 points on the same line");
+		// BV02: 3 points coincide
+		assertThrows(IllegalArgumentException.class, () -> new Plane(P1, P1, P1), ERROR_CONSTRUCT_COINC);
+
+		// BV03: 3 points on the same line
+		Point pLine1 = new Point(1, 1, 1);
+		Point pLine2 = new Point(2, 2, 2);
+		Point pLine3 = new Point(3, 3, 3);
+		assertThrows(IllegalArgumentException.class, () -> new Plane(pLine1, pLine2, pLine3), ERROR_CONSTRUCT_LINE);
 	}
 
 	@Test
 	void testGetNormal() {
-		Plane plane = new Plane(new Point(0, 0, 1), new Point(1, 0, 0), new Point(0, 1, 0));
+		Plane plane = new Plane(P1, P2, P3);
 
 		// ============ Equivalence Partitions Tests ==============
-		// TC01: Normal at a point on the plane (not the reference point)
-		Vector n = plane.getNormal(new Point(0.5, 0.5, 0)); // A point on the plane
-		assertEquals(1, n.length(), DELTA, "ERROR: Plane normal is not a unit vector");
+		// EP01: Normal at a point on the plane (not the reference point)
+		Vector n = plane.getNormal(new Point(0.5, 0.5, 0));
+		assertEquals(1.0, n.length(), DELTA, ERROR_NORMAL_LENGTH);
 
 		// =============== Boundary Values Tests ==================
-		// TC11: Normal at the reference point itself.
-		Vector nRef = plane.getNormal(new Point(0, 0, 1));
-		assertEquals(1, nRef.length(), DELTA, "ERROR: Plane normal at reference point is not a unit vector");
+		// BV01: Normal at the reference point itself
+		Vector nRef = plane.getNormal(P1);
+		assertEquals(1.0, nRef.length(), DELTA, ERROR_NORMAL_LENGTH);
 
-		// Check that normals match
-		assertEquals(n, nRef, "ERROR: Normal at reference point is different from normal at other point");
+		// Check that normals match everywhere on the plane
+		assertEquals(n, nRef, ERROR_NORMAL_MATCH);
 	}
 }
