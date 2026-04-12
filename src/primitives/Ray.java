@@ -1,5 +1,7 @@
 package primitives;
 
+import static primitives.Util.isZero;
+
 import java.util.Objects;
 
 /**
@@ -39,6 +41,21 @@ public final class Ray {
 	 */
 	public Vector direction() {
 		return _direction;
+	}
+
+	/**
+	 * Calculates a point on the ray at a specific distance from the origin. P = P0
+	 * + t * v
+	 * 
+	 * @param t the distance from the ray's head (p0)
+	 * 
+	 * @return the calculated point
+	 */
+	public Point getPoint(double t) {
+		if (isZero(t)) {
+			return _origin;
+		}
+		return _origin.add(_direction.scale(t));
 	}
 
 	@Override

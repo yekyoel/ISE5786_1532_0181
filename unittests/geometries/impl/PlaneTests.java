@@ -2,11 +2,13 @@ package geometries.impl;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
 import primitives.Point;
+import primitives.Ray;
 import primitives.Vector;
 
 /**
@@ -88,5 +90,45 @@ class PlaneTests {
 
 		// Check that normals match everywhere on the plane
 		assertEquals(n, nRef, ERROR_NORMAL_MATCH);
+	}
+
+	/**
+	 * Test method
+	 * for{@link geometries.impl.Plane#findIntersections(primitives.Ray)}.
+	 */
+	@Test
+	void testFindIntersections() {
+		Plane plane = new Plane(new Point(0, 0, 1), new Vector(0, 0, 1));
+
+		// ============ Equivalence Partitions Tests ==============
+		// EP01: Ray intersects the plane (1 point)
+		assertEquals(1, plane.findIntersections(new Ray(new Point(0, 0, 0), new Vector(1, 1, 1))).size(),
+				"EP01: Ray should intersect plane");
+
+		// EP02: Ray does not intersect the plane (0 points)
+		assertNull(plane.findIntersections(new Ray(new Point(0, 0, 2), new Vector(1, 1, 1))),
+				"EP02: Ray points away from plane");
+
+		// =============== Boundary Values Tests ==================
+		// **** Group: Ray is parallel to the plane
+		// BV11: Ray is parallel and outside the plane (0 points)
+		assertNull(plane.findIntersections(new Ray(new Point(0, 0, 2), new Vector(1, 0, 0))),
+				"BV11: Parallel ray outside");
+
+		// BV12: Ray is parallel and included in the plane (0 points)
+		assertNull(plane.findIntersections(new Ray(new Point(0, 0, 1), new Vector(1, 0, 0))),
+				"BV12: Parallel ray inside plane");
+
+		// **** Group: Ray is orthogonal to the plane
+		// BV13: Ray is orthogonal and starts before the plane (1 point)
+		assertEquals(1, plane.findIntersections(new Ray(new Point(0, 0, 0), new Vector(0, 0, 1))).size(),
+				"BV13: Orthogonal starts before");
+
+		// BV14: Ray is orthogonal and starts at the plane (0 points)
+		assertNull(plane.findIntersections(new Ray(new Point(0, 0, 1), new Vector(0, 0, 1))),
+				"BV14: Orthogonal starts at plane");
+
+		// BV15: Ray starts at the plane but is not orthogonal (0 points)
+		assertNull(plane.findIntersections(new Ray(new Point(1, 1, 1), new Vector(1, 1, 1))), "BV15: Starts at plane");
 	}
 }

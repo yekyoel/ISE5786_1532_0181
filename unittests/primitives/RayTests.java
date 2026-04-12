@@ -45,4 +45,26 @@ class RayTests {
 		assertEquals(1.0, ray.direction().length(), DELTA, ERROR_NORMALIZE_LEN);
 		assertEquals(EXPECTED_NORMALIZED_DIR, ray.direction(), ERROR_NORMALIZE_DIR);
 	}
+
+	/**
+	 * Test method for {@link primitives.Ray#getPoint(double t)}.
+	 */
+	@Test
+	void testGetPoint() {
+		Ray ray = new Ray(new Point(1, 0, 0), new Vector(1, 0, 0));
+
+		// ============ Equivalence Partitions Tests ==============
+
+		// EP01: Positive distance (t > 0)
+		assertEquals(new Point(2, 0, 0), ray.getPoint(1), "EP01: getPoint() with positive distance failed");
+
+		// EP02: Negative distance (t < 0)
+		assertEquals(new Point(0, 0, 0), ray.getPoint(-1), "EP02: getPoint() with negative distance failed");
+
+		// =============== Boundary Values Tests ==================
+
+		// BV01: Zero distance (t = 0)
+		assertEquals(new Point(1, 0, 0), ray.getPoint(0),
+				"BV01: getPoint() with zero distance failed to return ray head");
+	}
 }

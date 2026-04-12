@@ -6,7 +6,7 @@ import primitives.Vector;
 /**
  * The abstract class for all geometires
  */
-public abstract class Geometry {
+public abstract class Geometry extends Intersectable {
 	/** Empty default cnstructor for documentation tools */
 	public Geometry() {
 		/* Empty default cnstructor for documentation tools */}

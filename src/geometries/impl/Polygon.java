@@ -1,11 +1,13 @@
 package geometries.impl;
 
+import static primitives.Util.alignZero;
 import static primitives.Util.isZero;
 
 import java.util.List;
 
 import geometries.api.Geometry;
 import primitives.Point;
+import primitives.Ray;
 import primitives.Vector;
 
 /**
@@ -80,5 +82,49 @@ public class Polygon extends Geometry {
 	@Override
 	public Vector getNormal(Point point) {
 		return _plane.getNormal(point);
+	}
+
+	@Override
+	public List<Point> findIntersections(Ray ray) {
+		// Step 1: Check if the ray intersects the plane containing the polygon
+		// We use the already existing _plane field
+		List<Point> intersections = _plane.findIntersections(ray);
+		if (intersections == null)
+			return null;
+
+		Point p0 = ray.origin();
+		Vector v = ray.direction();
+		int size = _vertices.size();
+
+		// Step 2: Check if the intersection point is inside the polygon
+		// We calculate the sign of the first edge to compare with all others
+		Vector v1 = _vertices.get(0).subtract(p0);
+		Vector v2 = _vertices.get(1).subtract(p0);
+
+		// n = (v1 x v2).normalize()
+		// s = v * n
+		double s = alignZero(v.dotProduct(v1.crossProduct(v2).normalize()));
+
+		// If the point is exactly on the edge or vertex line, s will be zero
+		if (isZero(s))
+			return null;
+
+		boolean positive = s > 0;
+
+		// Loop through the rest of the edges
+		for (int i = 1; i < size; i++) {
+			v1 = v2;
+			v2 = _vertices.get((i + 1) % size).subtract(p0);
+
+			s = alignZero(v.dotProduct(v1.crossProduct(v2).normalize()));
+
+			// If s is zero or has a different sign than the first edge, it's outside
+			if (isZero(s) || (positive != (s > 0))) {
+				return null;
+			}
+		}
+
+		// If we passed all edges with the same sign, the point is inside
+		return intersections;
 	}
 }
