@@ -1,2 +1,15 @@
+# Java build outputs
 /bin/
-/doc/
+/out/
+*.class
+
+# Generated Javadocs (keep ignored if generated locally)
+docs/
+
+# IntelliJ IDEA local/project metadata
+.idea/
+*.iml
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
