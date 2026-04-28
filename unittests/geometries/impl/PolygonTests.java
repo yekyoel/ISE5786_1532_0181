@@ -2,11 +2,15 @@ package geometries.impl;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
 import primitives.Point;
+import primitives.Ray;
 import primitives.Vector;
 
 /**
@@ -108,5 +112,39 @@ class PolygonTests {
 			Vector edge = pts[i].subtract(pts[i == 0 ? pts.length - 1 : i - 1]);
 			assertEquals(0d, result.dotProduct(edge), DELTA, "Polygon normal is not orthogonal to an edge");
 		}
+	}
+
+	@Test
+	public void testFindIntersections() {
+		Polygon poly = new Polygon(new Point(0, 0, 1), new Point(1, 0, 1), new Point(0, 1, 1));
+
+		// ================== Equivalence Partitions Tests ==================
+
+		// EP01: Inside polygon (1 point)
+		assertEquals(List.of(new Point(0.2, 0.2, 1)),
+				poly.findIntersections(new Ray(new Point(0.2, 0.2, 0), new Vector(0, 0, 1))),
+				"Ray should intersect inside the polygon");
+
+		// EP02: Outside against edge (0 points)
+		assertNull(poly.findIntersections(new Ray(new Point(-1, -1, 0), new Vector(0, 0, 1))),
+				"Ray is outside the polygon");
+
+		// EP03: Outside against vertex (0 points)
+		assertNull(poly.findIntersections(new Ray(new Point(1, 1, 0), new Vector(0, 0, 1))),
+				"Ray is outside the polygon (near vertex)");
+
+		// ===================== Boundary Values Tests =====================
+
+		// BVA01: On edge (0 points)
+		assertNull(poly.findIntersections(new Ray(new Point(0.5, 0, 0), new Vector(0, 0, 1))),
+				"Ray on edge should return null");
+
+		// BVA02: In vertex (0 points)
+		assertNull(poly.findIntersections(new Ray(new Point(1, 0, 0), new Vector(0, 0, 1))),
+				"Ray on vertex should return null");
+
+		// BVA03: On edge's continuation (0 points)
+		assertNull(poly.findIntersections(new Ray(new Point(2, 0, 0), new Vector(0, 0, 1))),
+				"Ray on edge continuation should return null");
 	}
 }

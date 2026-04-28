@@ -1,5 +1,6 @@
 package geometries.impl;
 
+import static primitives.Util.alignZero;
 import static primitives.Util.isZero;
 
 import java.util.List;
@@ -43,8 +44,8 @@ public class Tube extends RadialGeometry {
 	@Override
 	public List<Point> findIntersections(Ray ray) {
 		Vector v = ray.direction();
-		Point p0 = ray.origin();
 		Vector va = _axis.direction();
+		Point p0 = ray.origin();
 		Point pa = _axis.origin();
 
 		// Vector from axis head to ray head
@@ -52,47 +53,61 @@ public class Tube extends RadialGeometry {
 		try {
 			deltaP = p0.subtract(pa);
 		} catch (IllegalArgumentException e) {
-			deltaP = null; // p0 == pa
+			deltaP = null; // Ray starts at the axis head
 		}
 
-		// Components for the quadratic equation at^2 + bt + c = 0
-		// a = (v - (v|va)*va)^2
-		// b = 2 * (v - (v|va)*va) | (deltaP - (deltaP|va)*va)
-		// c = (deltaP - (deltaP|va)*va)^2 - r^2
-
+		// Calculation of coefficients a, b, c for the quadratic equation
+		// a = (v - (v|va)va)^2
 		double vDotVa = v.dotProduct(va);
-		Vector vMinusVvaVa = isZero(vDotVa) ? v : v.subtract(va.scale(vDotVa));
+		Vector vMinusVvaVa = v;
+		if (!isZero(vDotVa)) {
+			try {
+				vMinusVvaVa = v.subtract(va.scale(vDotVa));
+			} catch (IllegalArgumentException e) {
+				return null; // Ray is parallel to the axis
+			}
+		}
 		double a = vMinusVvaVa.lengthSquared();
 
-		if (isZero(a))
-			return null; // Ray is parallel to axis
-
-		Vector deltaPMinusDeltaPvaVa = deltaP == null ? null
-				: (isZero(deltaP.dotProduct(va)) ? deltaP : deltaP.subtract(va.scale(deltaP.dotProduct(va))));
-
 		double b = 0;
-		if (deltaPMinusDeltaPvaVa != null)
-			b = 2 * vMinusVvaVa.dotProduct(deltaPMinusDeltaPvaVa);
+		double c = -_radius * _radius;
 
-		double c = (deltaPMinusDeltaPvaVa == null ? 0 : deltaPMinusDeltaPvaVa.lengthSquared()) - _radius * _radius;
+		if (deltaP != null) {
+			double dpDotVa = deltaP.dotProduct(va);
+			Vector dpMinusDpvaVa = deltaP;
+			if (!isZero(dpDotVa)) {
+				try {
+					dpMinusDpvaVa = deltaP.subtract(va.scale(dpDotVa));
+				} catch (IllegalArgumentException e) {
+					dpMinusDpvaVa = null;
+				}
+			}
 
-		// Solve quadratic equation
-		double discriminant = b * b - 4 * a * c;
+			if (dpMinusDpvaVa != null) {
+				b = 2 * vMinusVvaVa.dotProduct(dpMinusDpvaVa);
+				c += dpMinusDpvaVa.lengthSquared();
+			}
+		}
 
+		// Solve quadratic equation: at^2 + bt + c = 0
+		double discriminant = alignZero(b * b - 4 * a * c);
 		if (discriminant <= 0)
-			return null; // No real roots or tangent
-
-		double sqrtDisc = Math.sqrt(discriminant);
-		double t1 = (-b + sqrtDisc) / (2 * a);
-		double t2 = (-b - sqrtDisc) / (2 * a);
-
-		// Return only positive t values (points in front of the ray)
-		if (t1 <= 0 && t2 <= 0)
 			return null;
 
-		if (t1 > 0 && t2 > 0)
-			return List.of(ray.getPoint(t1), ray.getPoint(t2));
+		double sqrtD = Math.sqrt(discriminant);
+		double t1 = alignZero((-b + sqrtD) / (2 * a));
+		double t2 = alignZero((-b - sqrtD) / (2 * a));
 
-		return t1 > 0 ? List.of(ray.getPoint(t1)) : List.of(ray.getPoint(t2));
+		List<Point> result = null;
+		if (t1 > 0)
+			result = new java.util.ArrayList<>(List.of(ray.getPoint(t1)));
+		if (t2 > 0) {
+			if (result == null)
+				result = new java.util.ArrayList<>(List.of(ray.getPoint(t2)));
+			else
+				result.add(ray.getPoint(t2));
+		}
+
+		return result;
 	}
 }

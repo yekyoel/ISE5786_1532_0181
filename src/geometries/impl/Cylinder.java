@@ -49,4 +49,5 @@ public class Cylinder extends Tube {
 		// Otherwise, the point is on the lateral surface, so we use the Tube's logic
 		return super.getNormal(point);
 	}
+
 }

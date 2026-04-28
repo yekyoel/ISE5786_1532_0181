@@ -78,4 +78,5 @@ class CylinderTests {
 		// BV04: Point on the edge of the top base (between base and side)
 		assertEquals(NORMAL_Z, cyl.getNormal(new Point(1, 0, 2)), ERROR_TOP);
 	}
+
 }
