@@ -112,6 +112,9 @@ public final class Vector extends Point {
 		return new Vector(_xyz.divide(length()));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -121,6 +124,9 @@ public final class Vector extends Point {
 		return super.equals(obj);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public String toString() {
 		return super.toString();

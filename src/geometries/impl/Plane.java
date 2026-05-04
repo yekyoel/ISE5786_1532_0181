@@ -46,11 +46,17 @@ public class Plane extends Geometry {
 		_normal = normal.normalize();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Vector getNormal(Point point) {
 		return _normal;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public List<Point> findIntersections(Ray ray) {
 		double nv = _normal.dotProduct(ray.direction());

@@ -20,7 +20,7 @@ class GeometriesTests {
 
 	/**
 	 * Test method
-	 * for{@link geometries.impl.Geometries#findIntersections(primitives.Ray)}.
+	 * for {@link geometries.impl.Geometries#findIntersections(primitives.Ray)}.
 	 */
 	@Test
 	void testFindIntersections() {

@@ -39,17 +39,26 @@ public record Double3(double _d1, double _d2, double _d3) {
 		this(value, value, value);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		return this == obj || (obj instanceof Double3(double od1, double od2, double od3)) && isZero(_d1 - od1)
 				&& isZero(_d2 - od2) && isZero(_d3 - od3);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public int hashCode() {
 		return Objects.hash(_d1, _d2, _d3);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public String toString() {
 		return "(" + _d1 + "," + _d2 + "," + _d3 + ")";

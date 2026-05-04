@@ -25,11 +25,9 @@ public class Cylinder extends Tube {
 		_height = height;
 	}
 
-	/*
-	 * @Override public Vector getNormal(Point point) { // A cylinder's lateral
-	 * surface normal equals the tube normal return null; }
+	/**
+	 * {@inheritDoc}
 	 */
-
 	@Override
 	public Vector getNormal(Point point) {
 		Point p0 = _axis.origin();

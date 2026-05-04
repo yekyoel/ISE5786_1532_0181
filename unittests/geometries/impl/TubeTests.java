@@ -95,6 +95,9 @@ class TubeTests {
 		}
 	}
 
+	/**
+	 * Test method for tube-ray intersections.
+	 */
 	@Test
 	void testFindIntersections() {
 		// Tube: Center axis along Z, Radius 1

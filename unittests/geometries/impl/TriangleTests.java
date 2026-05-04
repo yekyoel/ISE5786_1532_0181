@@ -38,7 +38,7 @@ class TriangleTests {
 
 	/**
 	 * Test method
-	 * for{@link geometries.impl.Triangle#findIntersections(primitives.Ray)}.
+	 * for {@link geometries.impl.Triangle#findIntersections(primitives.Ray)}.
 	 */
 	@Test
 	void testFindIntersections() {

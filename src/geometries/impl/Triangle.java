@@ -23,6 +23,9 @@ public class Triangle extends Polygon {
 		super(p1, p2, p3);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public List<Point> findIntersections(Ray ray) {
 		// 1. Get the intersection with the plane containing the polygon

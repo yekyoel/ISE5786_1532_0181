@@ -73,6 +73,9 @@ public class Point {
 		return Math.sqrt(distanceSquared(other));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -83,6 +86,9 @@ public class Point {
 		return _xyz.equals(other._xyz);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public String toString() {
 		return _xyz.toString();

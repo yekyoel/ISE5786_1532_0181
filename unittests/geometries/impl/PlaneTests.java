@@ -94,7 +94,7 @@ class PlaneTests {
 
 	/**
 	 * Test method
-	 * for{@link geometries.impl.Plane#findIntersections(primitives.Ray)}.
+	 * for {@link geometries.impl.Plane#findIntersections(primitives.Ray)}.
 	 */
 	@Test
 	void testFindIntersections() {

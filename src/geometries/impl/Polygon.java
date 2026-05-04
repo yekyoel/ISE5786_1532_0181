@@ -79,11 +79,17 @@ public class Polygon extends Geometry {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Vector getNormal(Point point) {
 		return _plane.getNormal(point);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public List<Point> findIntersections(Ray ray) {
 		// Step 1: Check if the ray intersects the plane containing the polygon

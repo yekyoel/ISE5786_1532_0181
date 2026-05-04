@@ -4,12 +4,12 @@ import primitives.Point;
 import primitives.Vector;
 
 /**
- * The abstract class for all geometires
+ * Abstract base class for all geometries.
  */
 public abstract class Geometry extends Intersectable {
-	/** Empty default cnstructor for documentation tools */
+	/** Empty default constructor for documentation tools. */
 	public Geometry() {
-		/* Empty default cnstructor for documentation tools */}
+		/* Empty default constructor for documentation tools. */}
 
 	/**
 	 * Calculates the normal vector to the geometry at a specific point.

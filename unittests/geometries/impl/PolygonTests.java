@@ -114,6 +114,9 @@ class PolygonTests {
 		}
 	}
 
+	/**
+	 * Test method for polygon-ray intersections.
+	 */
 	@Test
 	public void testFindIntersections() {
 		Polygon poly = new Polygon(new Point(0, 0, 1), new Point(1, 0, 1), new Point(0, 1, 1));

@@ -27,6 +27,9 @@ public class Tube extends RadialGeometry {
 		_axis = axis;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Vector getNormal(Point point) {
 		Point p0 = _axis.origin();
@@ -41,6 +44,9 @@ public class Tube extends RadialGeometry {
 		return point.subtract(o).normalize();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public List<Point> findIntersections(Ray ray) {
 		Vector v = ray.direction();

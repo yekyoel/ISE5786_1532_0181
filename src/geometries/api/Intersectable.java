@@ -6,15 +6,19 @@ import primitives.Point;
 import primitives.Ray;
 
 /**
- * Interface for all geometric objects that can be intersected by a ray. This
- * class serves as the base for the behavioral model of the project, supporting
- * the Composite design pattern for geometric sets. * @author [Your Name]
+ * Base type for all geometric objects that can be intersected by a ray.
+ * <p>
+ * Serves as the behavioral root for geometry implementations and geometry
+ * composites.
+ * </p>
+ *
+ * @author Dan Zilberstein
  */
 public abstract class Intersectable {
 
-	/** Empty default cnstructor for documentation tools */
+	/** Empty default constructor for documentation tools. */
 	public Intersectable() {
-		/* Empty default cnstructor for documentation tools */}
+		/* Empty default constructor for documentation tools. */}
 
 	/**
 	 * Finds all intersection points between a given ray and the geometric shape.

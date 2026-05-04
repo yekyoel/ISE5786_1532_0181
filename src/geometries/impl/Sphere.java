@@ -26,6 +26,9 @@ public class Sphere extends RadialGeometry {
 		_center = center;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Vector getNormal(Point point) {
 		// The normal of a sphere is the vector from the center to the point on the
@@ -33,6 +36,9 @@ public class Sphere extends RadialGeometry {
 		return point.subtract(_center).normalize();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public List<Point> findIntersections(Ray ray) {
 		Point p0 = ray.origin();
