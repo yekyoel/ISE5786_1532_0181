@@ -13,3 +13,6 @@ docs/
 # OS / editor noise
 .DS_Store
 Thumbs.db
+
+# Images for rendering
+images/
