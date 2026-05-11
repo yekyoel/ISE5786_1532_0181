@@ -32,7 +32,7 @@ class SimpleRayTracer extends RayTracerBase {
         }
 
         Point closestPoint = ray.findClosestPoint(intersections);
-        return closestPoint == null ? _scene.background : calcColor(closestPoint);
+        return calcColor(closestPoint);
     }
 
     /**

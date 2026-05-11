@@ -69,7 +69,7 @@ class RenderTests {
     void testBasicRenderTwoColors() {
         Scene scene = new Scene("Two colors")                   //
                 .setBackground(new Color(75, 127, 90))                       //
-                .setAmbientLight(new AmbientLight(new Color(255, 191, 191)));
+                .setAmbientLight(new AmbientLight(new Color(205, 191, 191)));
 
         final double Z = -100D;
         // Left, Middle, Right X Bottom, Middle, Top
