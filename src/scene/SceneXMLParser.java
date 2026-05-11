@@ -130,8 +130,6 @@ public final class SceneXMLParser {
         Path[] candidates = {
                 Paths.get(normalizedName),
                 Paths.get(normalizedName + ".xml"),
-                Paths.get("xml", normalizedName),
-                Paths.get("xml", normalizedName + ".xml"),
                 Paths.get("docs", normalizedName),
                 Paths.get("docs", normalizedName + ".xml"),
                 Paths.get("xml")

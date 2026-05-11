@@ -1,5 +1,7 @@
 package primitives;
 
+import geometries.api.Intersectable.Intersection;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -92,27 +94,42 @@ public final class Ray {
     }
 
     /**
-     * Finds the closest point to the ray's origin from a given list of points.
+     * Finds the closest intersection to the ray's origin from a given list of intersections.
      *
-     * @param points List of points to check.
-     * @return The closest point, or null if the list is empty or null.
+     * @param intersections A list of intersections to evaluate.
+     * @return The closest Intersection object, or null if the list is empty or null.
      */
-    public Point findClosestPoint(List<Point> points) {
-        if (points == null || points.isEmpty()) {
+    public Intersection findClosestIntersection(List<Intersection> intersections) {
+        if (intersections == null || intersections.isEmpty()) {
             return null;
         }
 
-        Point closestPoint = null;
+        Intersection closest = null;
         double minDistanceSquared = Double.POSITIVE_INFINITY;
 
-        for (Point p : points) {
-            double distanceSquared = p.distanceSquared(_origin);
+        for (Intersection inter : intersections) {
+            double distanceSquared = inter.point.distanceSquared(_origin);
             if (distanceSquared < minDistanceSquared) {
                 minDistanceSquared = distanceSquared;
-                closestPoint = p;
+                closest = inter;
             }
         }
+        return closest;
+    }
 
-        return closestPoint;
+    /**
+     * Finds the closest point to the ray's origin from a given list of points.
+     * This method delegates its logic to {@link #findClosestIntersection(List)}.
+     *
+     * @param points A list of points to evaluate.
+     * @return The closest Point, or null if the list is empty or null.
+     */
+    public Point findClosestPoint(List<Point> points) {
+        return points == null || points.isEmpty() ? null
+                : findClosestIntersection(
+                points.stream()
+                .map(point -> new Intersection(null, point))
+                .toList()
+        ).point;
     }
 }
