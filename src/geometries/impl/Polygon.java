@@ -104,7 +104,7 @@ public class Polygon extends Geometry {
     @Override
     protected List<Intersection> calcIntersectionsHelper(Ray ray) {
         // Step 1: Check if the ray intersects the plane containing the polygon
-        List<Intersection> intersections = _plane.calcIntersections(ray);
+        List<Point> intersections = _plane.findIntersections(ray);
         if (intersections == null) {
             return null;
         }
@@ -137,6 +137,6 @@ public class Polygon extends Geometry {
 
         // CRITICAL: We passed all edges, meaning the point is inside.
         // We must wrap the point using 'this' (the Polygon), not the plane.
-        return List.of(new Intersection(this, intersections.get(0).point));
+        return List.of(new Intersection(this, intersections.get(0)));
     }
 }

@@ -32,7 +32,7 @@ public class Triangle extends Polygon {
     @Override
     protected List<Intersection> calcIntersectionsHelper(Ray ray) {
         // 1. Get the intersection with the plane containing the polygon
-        List<Intersection> intersections = _plane.calcIntersections(ray);
+        List<Point> intersections = _plane.findIntersections(ray);
         if (intersections == null) {
             return null;
         }
@@ -62,7 +62,7 @@ public class Triangle extends Polygon {
         // The point is inside the triangle only if all scalar products have the same sign
         if ((s1 > 0 && s2 > 0 && s3 > 0) || (s1 < 0 && s2 < 0 && s3 < 0)) {
             // CRITICAL: Wrap the plane's intersection point with 'this' triangle
-            return List.of(new Intersection(this, intersections.get(0).point));
+            return List.of(new Intersection(this, intersections.get(0)));
         }
 
         return null;
