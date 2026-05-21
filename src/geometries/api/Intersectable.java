@@ -3,6 +3,7 @@ package geometries.api;
 import primitives.Material;
 import primitives.Point;
 import primitives.Ray;
+import primitives.Vector;
 
 import java.util.List;
 
@@ -29,6 +30,28 @@ public abstract class Intersectable {
          * The material of the intersected geometry
          */
         public final Material material;
+
+        /**
+         * Cached normal at the intersection point (initialized during preprocessing).
+         */
+        public Vector n;
+        /**
+         * Cached view vector (from intersection point toward the camera).
+         */
+        public Vector v;
+        /**
+         * Cached dot product between the normal and the view vector (n . v).
+         */
+        public double nv;
+        /**
+         * Cached vector from the intersection point toward the light source.
+         */
+        public Vector l;
+        /**
+         * Cached dot product between the normal and the light vector (n . l).
+         */
+        public double nl;
+
 
         /**
          * Constructs an Intersection object.

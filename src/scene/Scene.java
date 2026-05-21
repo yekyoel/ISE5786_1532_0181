@@ -2,21 +2,36 @@ package scene;
 
 import geometries.impl.Geometries;
 import lighting.AmbientLight;
+import lighting.LightSource;
 import primitives.Color;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Represents a scene to be rendered.
  * Uses Passive Data Structure (PDS) architecture.
  */
 public class Scene {
-    /** Scene name identifier. */
+    /**
+     * Scene name identifier.
+     */
     public String name;
-    /** Scene background color. */
+    /**
+     * Scene background color.
+     */
     public Color background = Color.BLACK;
-    /** Ambient light source for the scene. */
+    /**
+     * Ambient light source for the scene.
+     */
     public AmbientLight ambientLight = AmbientLight.NONE;
-    /** Collection of all scene geometries. */
+    /**
+     * Collection of all scene geometries.
+     */
     public Geometries geometries = new Geometries();
+
+    /** List of light sources present in the scene. */
+    public List<LightSource> lights = new LinkedList<>();
 
     /**
      * Constructs a Scene with a given name.
