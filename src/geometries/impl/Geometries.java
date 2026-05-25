@@ -52,11 +52,11 @@ public class Geometries extends Intersectable {
      * @return a list of intersection objects, or null if no intersections are found
      */
     @Override
-    protected List<Intersection> calcIntersectionsHelper(Ray ray) {
+    protected List<Intersection> calcIntersectionsHelper(Ray ray, double maxDistance) {
         List<Intersection> result = null;
         for (Intersectable item : geometries) {
             // CRITICAL: Call the public method, not the helper!
-            var itemIntersections = item.calcIntersections(ray);
+            var itemIntersections = item.calcIntersections(ray, maxDistance);
 
             if (itemIntersections != null) {
                 if (result == null) {

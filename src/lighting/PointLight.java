@@ -8,7 +8,9 @@ import primitives.Vector;
  * Represents a point light source (e.g., a light bulb).
  */
 public class PointLight extends Light implements LightSource {
-    /** Position of the point light in the scene. */
+    /**
+     * Position of the point light in the scene.
+     */
     private final Point position;
     /**
      * Attenuation factors: constant, linear and quadratic.
@@ -72,5 +74,10 @@ public class PointLight extends Light implements LightSource {
     public Vector getL(Point p) {
         // Vector from the light source to the point
         return p.subtract(position).normalize();
+    }
+
+    @Override
+    public double getDistance(Point point) {
+        return position.distance(point);
     }
 }

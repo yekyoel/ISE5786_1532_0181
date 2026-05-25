@@ -102,12 +102,10 @@ public class Polygon extends Geometry {
      * @return a list containing the intersection object, or null if there is no intersection
      */
     @Override
-    protected List<Intersection> calcIntersectionsHelper(Ray ray) {
-        // Step 1: Check if the ray intersects the plane containing the polygon
-        List<Intersection> intersections = _plane.calcIntersections(ray);
-        if (intersections == null) {
-            return null;
-        }
+    protected List<Intersection> calcIntersectionsHelper(Ray ray, double maxDistance) {
+        // Pass the maxDistance to the plane
+        List<Intersection> intersections = _plane.calcIntersectionsHelper(ray, maxDistance);
+        if (intersections == null) return null;
 
         Point p0 = ray.origin();
         Vector v = ray.direction();

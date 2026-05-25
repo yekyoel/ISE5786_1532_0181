@@ -4,6 +4,7 @@ import geometries.api.Intersectable.Intersection;
 import lighting.LightSource;
 import primitives.Color;
 import primitives.Double3;
+import primitives.Point;
 import primitives.Ray;
 import primitives.Util;
 import primitives.Vector;
@@ -15,6 +16,11 @@ import java.util.List;
  * Basic ray tracer implementation that accounts for ambient light attenuation and emission colors.
  */
 class SimpleRayTracer extends RayTracerBase {
+    /**
+     * A small constant used to shift the origin of secondary rays.
+     * This shift prevents self-shadowing and self-intersections caused by floating-point inaccuracies.
+     */
+    private static final double DELTA = 0.1; //
 
     /**
      * Creates a simple ray tracer for the given scene.
@@ -67,7 +73,8 @@ class SimpleRayTracer extends RayTracerBase {
         Color color = Color.BLACK;
         for (LightSource lightSource : _scene.lights) {
             // Checks if the light hits the same side that the camera sees
-            if (preprocessLightSource(intersection, lightSource)) {
+            // AND checks if the intersection point has a clear line of sight to the light source
+            if (preprocessLightSource(intersection, lightSource) && unshaded(intersection, lightSource)) {
                 Color lightIntensity = lightSource.getIntensity(intersection.point);
                 color = color.add(
                         lightIntensity.scale(calcDiffuse(intersection)),
@@ -107,5 +114,32 @@ class SimpleRayTracer extends RayTracerBase {
 
         double max = Math.pow(minusVR, intersection.material.nShininess);
         return intersection.material.kS.scale(max);
+    }
+
+    /**
+     * Checks if there is a clear line of sight between an intersection point and a light source.
+     * Generates a shadow ray to determine if the point is occluded by other geometries.
+     *
+     * @param intersection the intersection point on a geometry
+     * @param lightSource  the light source being evaluated
+     * @return true if the point is unshaded (has a clear line of sight to the light), false if it is blocked
+     */
+    private boolean unshaded(Intersection intersection, LightSource lightSource) {
+        Vector lightDirection = lightSource.getL(intersection.point).scale(-1); // from point to light
+        Vector delta = intersection.n.scale(intersection.n.dotProduct(lightDirection) > 0 ? DELTA : -DELTA);
+        Point shiftedPoint = intersection.point.add(delta);
+        Ray shadowRay = new Ray(shiftedPoint, lightDirection);
+        double lightDistance = lightSource.getDistance(intersection.point);
+
+        List<Intersection> intersections = _scene.geometries.calcIntersections(shadowRay, lightDistance);
+
+        if (intersections == null) return true;
+
+        for (Intersection geo : intersections) {
+            if (shiftedPoint.distance(geo.point) < lightDistance) {
+                return false; // An object is blocking the light
+            }
+        }
+        return true;
     }
 }

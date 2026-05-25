@@ -8,7 +8,6 @@ import primitives.Vector;
 import java.util.List;
 
 import static primitives.Util.alignZero;
-import static primitives.Util.isZero;
 
 /**
  * Represents an infinite plane in 3D space.
@@ -65,23 +64,20 @@ public class Plane extends Geometry {
      * @return a list containing the intersection object, or null if there is no intersection
      */
     @Override
-    protected List<Intersection> calcIntersectionsHelper(Ray ray) {
-        double nv = _normal.dotProduct(ray.direction());
+    protected List<Intersection> calcIntersectionsHelper(Ray ray, double maxDistance) {
+        double nv = alignZero(_normal.dotProduct(ray.direction()));
+        if (nv == 0) return null; // Ray is parallel to the plane
 
-        // Ray is parallel to the plane (nv == 0)
-        if (isZero(nv)) {
-            return null;
+        // If the ray starts exactly at the plane's reference point, t is 0 (no valid forward intersection).
+        // Guarding here avoids creating a forbidden zero vector in Point.subtract.
+        if (_point.equals(ray.origin())) return null;
+
+        double t = alignZero(_normal.dotProduct(_point.subtract(ray.origin())) / nv);
+
+        // Check if t > 0 AND t <= maxDistance
+        if (t > 0 && alignZero(t - maxDistance) <= 0) {
+            return List.of(new Intersection(this, ray.getPoint(t)));
         }
-
-        try {
-            Vector p0Q0 = _point.subtract(ray.origin());
-            double t = alignZero(_normal.dotProduct(p0Q0) / nv);
-
-            // Intersection must be in the direction of the ray (t > 0)
-            return t <= 0 ? null : List.of(new Intersection(this, ray.getPoint(t)));
-        } catch (IllegalArgumentException e) {
-            // Ray starts exactly at the plane's reference point Q0
-            return null;
-        }
+        return null;
     }
 }
