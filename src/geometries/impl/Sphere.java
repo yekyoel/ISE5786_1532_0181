@@ -45,39 +45,40 @@ public class Sphere extends RadialGeometry {
      * @return a list of intersection objects, or null if there are no intersections
      */
     @Override
-    protected List<Intersection> calcIntersectionsHelper(Ray ray) {
+    protected List<Intersection> calcIntersectionsHelper(Ray ray, double maxDistance) {
         Point p0 = ray.origin();
         Vector v = ray.direction();
-        Vector u;
 
-        try {
-            u = _center.subtract(p0);
-        } catch (IllegalArgumentException e) {
-            // Ray starts exactly at the center of the sphere
-            return List.of(new Intersection(this, ray.getPoint(_radius)));
-        }
-
-        double tm = alignZero(v.dotProduct(u));
-        double dSquared = u.lengthSquared() - tm * tm;
-        double thSquared = alignZero(_radius * _radius - dSquared);
-
-        if (thSquared <= 0) return null; // No intersections
-
-        double th = Math.sqrt(thSquared);
-        double t1 = alignZero(tm - th);
-        double t2 = alignZero(tm + th);
-
-        if (t1 <= 0 && t2 <= 0) {
+        if (p0.equals(_center)) {
+            // If the ray starts exactly at the center, t = radius
+            if (alignZero(_radius - maxDistance) <= 0) {
+                return List.of(new Intersection(this, ray.getPoint(_radius)));
+            }
             return null;
         }
 
-        if (t1 > 0 && t2 > 0) {
-            return List.of(new Intersection(this, ray.getPoint(t1)), new Intersection(this, ray.getPoint(t2)));
-        }
-        if (t1 > 0) {
+        Vector u = _center.subtract(p0);
+        double tm = alignZero(v.dotProduct(u));
+        double d = alignZero(Math.sqrt(u.lengthSquared() - tm * tm));
+
+        if (d >= _radius) return null;
+
+        double th = alignZero(Math.sqrt(_radius * _radius - d * d));
+        double t1 = alignZero(tm - th);
+        double t2 = alignZero(tm + th);
+
+        // Filter valid t values using maxDistance
+        boolean isValidT1 = t1 > 0 && alignZero(t1 - maxDistance) <= 0;
+        boolean isValidT2 = t2 > 0 && alignZero(t2 - maxDistance) <= 0;
+
+        if (isValidT1 && isValidT2) {
+            return List.of(
+                    new Intersection(this, ray.getPoint(t1)),
+                    new Intersection(this, ray.getPoint(t2))
+            );
+        } else if (isValidT1) {
             return List.of(new Intersection(this, ray.getPoint(t1)));
-        }
-        if (t2 > 0) {
+        } else if (isValidT2) {
             return List.of(new Intersection(this, ray.getPoint(t2)));
         }
         return null;

@@ -30,12 +30,10 @@ public class Triangle extends Polygon {
      * @return a list containing the intersection object, or null if there is no intersection
      */
     @Override
-    protected List<Intersection> calcIntersectionsHelper(Ray ray) {
-        // 1. Get the intersection with the plane containing the polygon
-        List<Point> intersections = _plane.findIntersections(ray);
-        if (intersections == null) {
-            return null;
-        }
+    protected List<Intersection> calcIntersectionsHelper(Ray ray, double maxDistance) {
+        // Pass the maxDistance to the plane
+        List<Intersection> intersections = _plane.calcIntersectionsHelper(ray, maxDistance);
+        if (intersections == null) return null;
 
         Point p0 = ray.origin();
         Vector v = ray.direction();
@@ -62,7 +60,7 @@ public class Triangle extends Polygon {
         // The point is inside the triangle only if all scalar products have the same sign
         if ((s1 > 0 && s2 > 0 && s3 > 0) || (s1 < 0 && s2 < 0 && s3 < 0)) {
             // CRITICAL: Wrap the plane's intersection point with 'this' triangle
-            return List.of(new Intersection(this, intersections.get(0)));
+            return List.of(new Intersection(this, intersections.get(0).point));
         }
 
         return null;

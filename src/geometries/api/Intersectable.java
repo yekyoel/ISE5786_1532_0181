@@ -1,10 +1,10 @@
 package geometries.api;
 
+import lighting.LightSource;
 import primitives.Material;
 import primitives.Point;
 import primitives.Ray;
 import primitives.Vector;
-import lighting.LightSource;
 
 import java.util.List;
 
@@ -107,23 +107,13 @@ public abstract class Intersectable {
                   .toList();
     }
 
-    /**
-     * Calculates the intersections between a ray and the geometry.
-     * This is the public, non-overridable method of the NVI pattern.
-     *
-     * @param ray the ray to trace
-     * @return a list of Intersection objects, or null if none are found
-     */
     public final List<Intersection> calcIntersections(Ray ray) {
-        return calcIntersectionsHelper(ray);
+        return calcIntersections(ray, Double.POSITIVE_INFINITY);
     }
 
-    /**
-     * Abstract helper method to be implemented by specific geometries to calculate intersections.
-     * This is the protected method of the NVI pattern that child classes override.
-     *
-     * @param ray the ray to trace
-     * @return a list of Intersection objects, or null if none are found
-     */
-    protected abstract List<Intersection> calcIntersectionsHelper(Ray ray);
+    public final List<Intersection> calcIntersections(Ray ray, double maxDistance) {
+        return calcIntersectionsHelper(ray, maxDistance);
+    }
+
+    protected abstract List<Intersection> calcIntersectionsHelper(Ray ray, double maxDistance);
 }

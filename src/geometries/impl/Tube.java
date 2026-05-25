@@ -53,7 +53,7 @@ public class Tube extends RadialGeometry {
      * @return a list of intersection objects, or null if there are no intersections
      */
     @Override
-    protected List<Intersection> calcIntersectionsHelper(Ray ray) {
+    protected List<Intersection> calcIntersectionsHelper(Ray ray, double maxDistance) {
         Vector v = ray.direction();
         Vector va = _axis.direction();
         Point p0 = ray.origin();
@@ -104,18 +104,20 @@ public class Tube extends RadialGeometry {
         double t1 = alignZero((-b + sqrtD) / (2 * a));
         double t2 = alignZero((-b - sqrtD) / (2 * a));
 
-        List<Intersection> result = null;
-        if (t1 > 0) {
-            result = new java.util.LinkedList<>(List.of(new Intersection(this, ray.getPoint(t1))));
-        }
-        if (t2 > 0) {
-            if (result == null) {
-                result = new java.util.LinkedList<>(List.of(new Intersection(this, ray.getPoint(t2))));
-            } else {
-                result.add(new Intersection(this, ray.getPoint(t2)));
-            }
+        boolean isValidT1 = t1 > 0 && alignZero(t1 - maxDistance) <= 0;
+        boolean isValidT2 = t2 > 0 && alignZero(t2 - maxDistance) <= 0;
+
+        if (isValidT1 && isValidT2) {
+            return List.of(
+                    new Intersection(this, ray.getPoint(t1)),
+                    new Intersection(this, ray.getPoint(t2))
+            );
+        } else if (isValidT1) {
+            return List.of(new Intersection(this, ray.getPoint(t1)));
+        } else if (isValidT2) {
+            return List.of(new Intersection(this, ray.getPoint(t2)));
         }
 
-        return result;
+        return null;
     }
 }
