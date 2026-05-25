@@ -15,6 +15,8 @@ import primitives.Point;
 import primitives.Vector;
 import scene.Scene;
 
+import java.util.List;
+
 import static java.awt.Color.BLUE;
 
 /**
@@ -285,4 +287,59 @@ class LightsTests {
                 .writeToImage("lightTrianglesSpotSharp");
     }
 
+    /**
+     * Produce a picture of a sphere lighted by multiple light sources
+     * (Directional, Point, and Spot) to test combined lighting effects.
+     */
+    @Test
+    void testSphereMultiLights() {
+        _scene1.geometries.add(SPHERE);
+
+        // Adding 3 different light sources with distinct colors and positions
+        _scene1.lights.addAll(List.of(
+                // Reddish directional light coming from the top right
+                new DirectionalLight(new Color(300, 100, 100), new Vector(1, -1, -1)),
+
+                // Bluish point light nearby
+                new PointLight(new Color(0, 300, 400), new Point(50, 50, 50))
+                        .setKl(0.0001).setKq(0.000005),
+
+                // Greenish spotlight targeting the sphere from the bottom left
+                new SpotLight(new Color(100, 400, 100), new Point(-50, -50, 50), new Vector(1, 1, -2))
+                        .setKl(0.0001).setKq(0.000005)
+        ));
+
+        _camera1.setResolution(500, 500)
+                .build()
+                .renderImage()
+                .writeToImage("lightSphereMulti");
+    }
+
+    /**
+     * Produce a picture of two triangles lighted by multiple light sources
+     * (Directional, Point, and Spot) to test combined lighting effects.
+     */
+    @Test
+    void testTrianglesMultiLights() {
+        _scene2.geometries.add(TRIANGLE1, TRIANGLE2);
+
+        // Adding 3 different light sources with distinct colors and positions
+        _scene2.lights.addAll(List.of(
+                // Greenish directional light
+                new DirectionalLight(new Color(100, 250, 100), new Vector(0, -1, -1)),
+
+                // Reddish point light
+                new PointLight(new Color(500, 100, 100), new Point(10, -10, -70))
+                        .setKl(0.0005).setKq(0.0005),
+
+                // Bluish spotlight
+                new SpotLight(new Color(100, 100, 500), new Point(-10, -10, -70), new Vector(-2, -2, -1))
+                        .setKl(0.001).setKq(0.0001)
+        ));
+
+        _camera2.setResolution(500, 500)
+                .build()
+                .renderImage()
+                .writeToImage("lightTrianglesMulti");
+    }
 }

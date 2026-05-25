@@ -4,6 +4,7 @@ import primitives.Material;
 import primitives.Point;
 import primitives.Ray;
 import primitives.Vector;
+import lighting.LightSource;
 
 import java.util.List;
 
@@ -51,6 +52,10 @@ public abstract class Intersectable {
          * Cached dot product between the normal and the light vector (n . l).
          */
         public double nl;
+        /**
+         * The active light source currently being processed for this intersection.
+         */
+        public LightSource light;
 
 
         /**
