@@ -56,6 +56,7 @@ abstract class RayTracerBase {
      * @return true if the light and view are on the same side of the surface normal, false otherwise
      */
     protected boolean preprocessLightSource(Intersection intersection, LightSource light) {
+        intersection.light = light;
         intersection.l = light.getL(intersection.point);
         intersection.nl = Util.alignZero(intersection.n.dotProduct(intersection.l));
         return Util.compareSign(intersection.nl, intersection.nv);
