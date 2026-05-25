@@ -16,8 +16,17 @@ import java.util.List;
  * emission colors, local lighting (Phong), and global effects (reflection, partial transparency, and shadowing).
  */
 class SimpleRayTracer extends RayTracerBase {
+    /**
+     * Maximum recursion depth for global effect recursion.
+     */
     private static final int MAX_CALC_COLOR_LEVEL = 10;
+    /**
+     * Minimum attenuation factor required to keep recursive contributions.
+     */
     private static final double MIN_CALC_COLOR_K = 0.001;
+    /**
+     * Initial attenuation factor for recursive color calculations.
+     */
     private static final Double3 INITIAL_K = Double3.ONE;
 
     /**
@@ -67,7 +76,13 @@ class SimpleRayTracer extends RayTracerBase {
     }
 
     /**
-     * Calculate global effects combining reflection and transparency rays.
+     * Calculate global effects by tracing reflection and transparency rays and
+     * accumulating their recursive color contribution.
+     *
+     * @param intersection the current surface intersection being shaded
+     * @param level        the remaining recursion depth for secondary rays
+     * @param k            the accumulated attenuation factor for recursion
+     * @return the color contribution from global effects
      */
     private Color calcGlobalEffects(Intersection intersection, int level, Double3 k) {
         Vector n = intersection.n;
@@ -82,6 +97,12 @@ class SimpleRayTracer extends RayTracerBase {
 
     /**
      * Calculate a single global effect for a secondary ray (transparency or reflection).
+     *
+     * @param ray   the secondary ray to trace
+     * @param level the remaining recursion depth for secondary rays
+     * @param k     the accumulated attenuation factor for recursion
+     * @param kx    the material coefficient for the given effect
+     * @return the color contribution from this global effect
      */
     private Color calcGlobalEffect(Ray ray, int level, Double3 k, Double3 kx) {
         Double3 kkx = k.product(kx);
@@ -98,6 +119,11 @@ class SimpleRayTracer extends RayTracerBase {
 
     /**
      * Helper method to construct a reflection ray.
+     *
+     * @param intersection the surface intersection
+     * @param v            the view direction from the camera
+     * @param n            the surface normal at the intersection
+     * @return the reflection ray, or {@code null} if the ray is tangent to the surface
      */
     private Ray constructReflectionRay(Intersection intersection, Vector v, Vector n) {
         double vn = v.dotProduct(n);
@@ -108,13 +134,21 @@ class SimpleRayTracer extends RayTracerBase {
 
     /**
      * Helper method to construct a transparency ray.
+     *
+     * @param intersection the surface intersection
+     * @param v            the view direction from the camera
+     * @param n            the surface normal at the intersection
+     * @return the transparency ray starting at the surface
      */
     private Ray constructTransparencyRay(Intersection intersection, Vector v, Vector n) {
         return new Ray(intersection.point, v, n);
     }
 
     /**
-     * Method centralizing the calculation of intersections and selecting the closest one.
+     * Calculate and select the closest intersection for a given ray.
+     *
+     * @param ray the ray to trace against scene geometry
+     * @return the closest intersection or {@code null} if none exist
      */
     private Intersection findClosestIntersection(Ray ray) {
         List<Intersection> intersections = _scene.geometries.calcIntersections(ray);
@@ -153,11 +187,12 @@ class SimpleRayTracer extends RayTracerBase {
     }
 
     /**
-     * Steps 1+2+3: Calculates the transparency and accumulated attenuation coefficient
-     * along the shadow ray. Uses the max-distance optimization (Bonus 3) to pre-filter distant objects.
-     * * @param intersection the intersection point on the surface
+     * Calculate transparency and the accumulated attenuation coefficient along the shadow ray.
+     * Uses the max-distance optimization (Bonus 3) to pre-filter distant objects.
+     *
+     * @param intersection the intersection point on the surface
      * @param lightSource  the light source being evaluated
-     * @return the accumulated attenuation coefficient (1.0 = fully lit, 0.0 = fully shaded)
+     * @return the accumulated transparency coefficient (1.0 = fully lit, 0.0 = fully shaded)
      */
     private Double3 transparency(Intersection intersection, LightSource lightSource) {
         Vector lightDirection = lightSource.getL(intersection.point).scale(-1);
@@ -181,11 +216,23 @@ class SimpleRayTracer extends RayTracerBase {
         return ktr;
     }
 
+    /**
+     * Calculate diffuse light contribution for the current intersection.
+     *
+     * @param intersection the current surface intersection
+     * @return the diffuse attenuation factor for the intersection
+     */
     private Double3 calcDiffuse(Intersection intersection) {
         double nl = Math.abs(intersection.nl);
         return intersection.material.kD.scale(nl);
     }
 
+    /**
+     * Calculate specular light contribution for the current intersection.
+     *
+     * @param intersection the current surface intersection
+     * @return the specular attenuation factor for the intersection
+     */
     private Double3 calcSpecular(Intersection intersection) {
         Vector r = intersection.l.subtract(intersection.n.scale(2 * intersection.nl)).normalize();
         double minusVR = Util.alignZero(intersection.v.scale(-1).dotProduct(r));
@@ -197,7 +244,11 @@ class SimpleRayTracer extends RayTracerBase {
     }
 
     /**
-     * The old, binary unshaded method - kept in the code per the instructions for lecturer grading.
+     * The old, binary unshaded method kept for lecturer grading.
+     *
+     * @param intersection the surface intersection
+     * @param lightSource  the light source being evaluated
+     * @return {@code true} if no opaque geometry blocks the light
      */
     @SuppressWarnings("unused")
     private boolean unshaded(Intersection intersection, LightSource lightSource) {
