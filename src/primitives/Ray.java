@@ -30,8 +30,7 @@ public final class Ray {
     /**
      * Constructor for secondary rays that automatically shifts the ray head
      * along the normal vector to avoid numerical precision errors (self-intersection).
-     * * @param head      the original intersection point on the geometry
-     *
+     * @param origin    the original intersection point on the geometry
      * @param direction the direction vector of the new secondary ray
      * @param normal    the normal vector of the geometry at the intersection point
      */

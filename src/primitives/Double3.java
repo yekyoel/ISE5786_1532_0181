@@ -143,8 +143,8 @@ public record Double3(double _d1, double _d2, double _d3) {
     /**
      * Checks if the current Double3 object is greater than a given scalar value.
      * This logic is the strict logical negation of isLowerThan using De Morgan's laws.
-     * * @param k the scalar value to compare against
      *
+     * @param k the scalar value to compare against
      * @return true if greater than the value, false otherwise
      */
     public boolean isGreaterThan(double k) {

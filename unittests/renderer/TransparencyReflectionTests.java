@@ -170,4 +170,5 @@ class TransparencyReflectionTests {
         camera.build().renderImage().writeToImage("customStage8Scene");
     }
 
+
 }

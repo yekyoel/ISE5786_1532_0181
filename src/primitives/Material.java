@@ -21,7 +21,14 @@ public class Material {
      */
     public int nShininess = 0;
 
+    /**
+     * Transmission coefficients (transparency per channel).
+     */
     public Double3 kT = Double3.ZERO;
+
+    /**
+     * Reflection coefficients (reflectivity per channel).
+     */
     public Double3 kR = Double3.ZERO;
 
 
@@ -108,21 +115,45 @@ public class Material {
         return this;
     }
 
+    /**
+     * Set transmission coefficients (transparency per channel).
+     *
+     * @param kT transmission coefficients per channel
+     * @return this Material (for chaining)
+     */
     public Material setKt(Double3 kT) {
         this.kT = kT;
         return this;
     }
 
+    /**
+     * Set uniform transmission coefficient (transparency).
+     *
+     * @param kT uniform transmission coefficient
+     * @return this Material (for chaining)
+     */
     public Material setKt(double kT) {
         this.kT = new Double3(kT);
         return this;
     }
 
+    /**
+     * Set reflection coefficients (reflectivity per channel).
+     *
+     * @param kR reflection coefficients per channel
+     * @return this Material (for chaining)
+     */
     public Material setKr(Double3 kR) {
         this.kR = kR;
         return this;
     }
 
+    /**
+     * Set uniform reflection coefficient (reflectivity).
+     *
+     * @param kR uniform reflection coefficient
+     * @return this Material (for chaining)
+     */
     public Material setKr(double kR) {
         this.kR = new Double3(kR);
         return this;
