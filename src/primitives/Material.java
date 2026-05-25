@@ -4,14 +4,26 @@ package primitives;
  * Represents the material properties of a geometric body.
  */
 public class Material {
-    /** Ambient reflection coefficients (per-channel). */
+    /**
+     * Ambient reflection coefficients (per-channel).
+     */
     public Double3 kA = Double3.ONE;
-    /** Diffuse reflection coefficients (per-channel). */
+    /**
+     * Diffuse reflection coefficients (per-channel).
+     */
     public Double3 kD = Double3.ZERO;
-    /** Specular reflection coefficients (per-channel). */
+    /**
+     * Specular reflection coefficients (per-channel).
+     */
     public Double3 kS = Double3.ZERO;
-    /** Shininess exponent for specular highlight size. */
+    /**
+     * Shininess exponent for specular highlight size.
+     */
     public int nShininess = 0;
+
+    public Double3 kT = Double3.ZERO;
+    public Double3 kR = Double3.ZERO;
+
 
     /**
      * Default material with sensible defaults (no diffuse/specular, unit ambient).
@@ -93,6 +105,26 @@ public class Material {
      */
     public Material setShininess(int nShininess) {
         this.nShininess = nShininess;
+        return this;
+    }
+
+    public Material setKt(Double3 kT) {
+        this.kT = kT;
+        return this;
+    }
+
+    public Material setKt(double kT) {
+        this.kT = new Double3(kT);
+        return this;
+    }
+
+    public Material setKr(Double3 kR) {
+        this.kR = kR;
+        return this;
+    }
+
+    public Material setKr(double kR) {
+        this.kR = new Double3(kR);
         return this;
     }
 }

@@ -20,6 +20,37 @@ public final class Ray {
      */
     private final Vector _direction;
 
+    // Inside Ray.java
+
+    /**
+     * Constant offset size to avoid self-shading / self-intersection
+     */
+    public static final double DELTA = 0.1;
+
+    /**
+     * Constructor for secondary rays that automatically shifts the ray head
+     * along the normal vector to avoid numerical precision errors (self-intersection).
+     * * @param head      the original intersection point on the geometry
+     *
+     * @param direction the direction vector of the new secondary ray
+     * @param normal    the normal vector of the geometry at the intersection point
+     */
+    public Ray(Point origin, Vector direction, Vector normal) {
+        this._direction = direction.normalize();
+
+        // Check the dot product of the direction and the normal
+        double nv = normal.dotProduct(this._direction);
+
+        if (primitives.Util.isZero(nv)) {
+            // If they are perpendicular, do not shift the head
+            this._origin = origin;
+        } else {
+            // Shift along the normal: positive direction if nv > 0, negative if nv < 0
+            Vector deltaVector = normal.scale(nv > 0 ? DELTA : -DELTA);
+            this._origin = origin.add(deltaVector);
+        }
+    }
+
     /**
      * Constructs a ray with the given origin point and direction vector. The
      * direction vector is automatically normalized before being saved.
