@@ -171,7 +171,7 @@ class SimpleRayTracer extends RayTracerBase {
             if (preprocessLightSource(intersection, lightSource)) {
 
                 // Step 4: Replace the unshaded call with the new transparency method
-                Double3 ktr = transparency(intersection, lightSource);
+                Double3 ktr = transparency(intersection);
 
                 // Check if the accumulated product of ktr and k is significant enough to affect the color
                 if (ktr.product(k).isGreaterThan(MIN_CALC_COLOR_K)) {
@@ -191,14 +191,13 @@ class SimpleRayTracer extends RayTracerBase {
      * Uses the max-distance optimization (Bonus 3) to pre-filter distant objects.
      *
      * @param intersection the intersection point on the surface
-     * @param lightSource  the light source being evaluated
      * @return the accumulated transparency coefficient (1.0 = fully lit, 0.0 = fully shaded)
      */
-    private Double3 transparency(Intersection intersection, LightSource lightSource) {
-        Vector lightDirection = lightSource.getL(intersection.point).scale(-1);
+    private Double3 transparency(Intersection intersection) {
+        Vector lightDirection = intersection.l.scale(-1);
         Ray shadowRay = new Ray(intersection.point, lightDirection, intersection.n);
 
-        double lightDistance = lightSource.getDistance(intersection.point);
+        double lightDistance = intersection.light.getDistance(intersection.point);
         List<Intersection> intersections = _scene.geometries.calcIntersections(shadowRay, lightDistance);
 
         if (intersections == null) return Double3.ONE;
