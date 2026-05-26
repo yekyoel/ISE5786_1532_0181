@@ -5,6 +5,7 @@ import lighting.AmbientLight;
 import lighting.LightSource;
 import primitives.Color;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -31,7 +32,7 @@ public class Scene {
     public Geometries geometries = new Geometries();
 
     /** List of light sources present in the scene. */
-    public List<LightSource> lights = new LinkedList<>();
+    public List<LightSource> lights = new ArrayList<>();
 
     /**
      * Constructs a Scene with a given name.

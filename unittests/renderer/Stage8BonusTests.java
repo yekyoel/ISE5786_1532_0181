@@ -102,16 +102,50 @@ class Stage8BonusTests {
         // Soft directional light filling in shadows from the left
         scene.lights.add(new DirectionalLight(new Color(40, 40, 40), new Vector(-1, -0.5, -1)));
 
-        // 11. Camera setup and Rendering
-        Camera.getBuilder()
-                .setLocation(new Point(0, 70, 350)) // Placed high and far back
-                .setDirection(new Point(0, 10, 0), Vector.AXIS_Y) // Looking slightly downward at the altar
+        // 11. Camera setup
+        Camera.Builder cameraBuilder =Camera.getBuilder()
                 .setVpDistance(200)
                 .setVpSize(200, 200)
                 .setResolution(1000, 1000) // High res for crisp reflections
-                .setRayTracer(scene, RayTracerType.SIMPLE)
+                .setRayTracer(scene, RayTracerType.SIMPLE);
+
+        // 11. Rendering the original image
+        cameraBuilder
+                .setLocation(new Point(0, 70, 350)) // Placed high and far back
+                .setDirection(new Point(0, 10, 0), Vector.AXIS_Y) // Looking slightly downward at the altar
                 .build()
                 .renderImage()
                 .writeToImage("bonus_stage8_10plus_shapes_altar");
+
+        // 12. Rendering the original image with a higher angle
+        cameraBuilder
+                .setLocation(new Point(0, 70, 350)) // Placed high and far back
+                .setDirection(new Point(0, 10, 0), Vector.AXIS_Y) // Looking slightly downward at the altar
+                .move(new Vector(0,400,0))
+                .rotate(-10,0,0)
+                .build()
+                .renderImage()
+                .writeToImage("bonus_stage8_10plus_shapes_altar_different1");
+
+        // 13. Rendering the original image from a side view
+        cameraBuilder
+                .setLocation(new Point(0, 70, 350)) // Placed high and far back
+                .setDirection(new Point(0, 10, 0), Vector.AXIS_Y) // Looking slightly downward at the altar
+                .move(new Vector(350,0,-350))
+                .rotate(0,-10,0)
+                .build()
+                .renderImage()
+                .writeToImage("bonus_stage8_10plus_shapes_altar_different2");
+
+        // 14. Rendering the original image rotated
+        cameraBuilder
+                .setLocation(new Point(0, 70, 350)) // Placed high and far back
+                .setDirection(new Point(0, 10, 0), Vector.AXIS_Y) // Looking slightly downward at the altar
+                .rotate(0,0,45)
+                .build()
+                .renderImage()
+                .writeToImage("bonus_stage8_10plus_shapes_altar_different3");
+
+
     }
 }
