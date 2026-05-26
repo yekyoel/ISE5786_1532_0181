@@ -17,6 +17,12 @@ import scene.Scene;
 class Stage8BonusTests {
 
     /**
+     * Creates the Stage 8 bonus test fixture.
+     */
+    public Stage8BonusTests() {
+    }
+
+    /**
      * Renders a mystical altar scene.
      */
     @Test

@@ -73,6 +73,9 @@ class TriangleTests {
                 "BV13: On edge continuation");
     }
 
+    /**
+     * Tests {@link Triangle#calcIntersections(Ray, double)} with a max-distance limit.
+     */
     @Test
     void testFindIntersectionsWithMaxDistance() {
         Triangle triangle = new Triangle(new Point(1, 0, 1), new Point(0, 1, 1), new Point(-1, -1, 1));

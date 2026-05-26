@@ -115,6 +115,9 @@ class SphereTests {
                 "BV32: Tangent ray starts at point");
     }
 
+    /**
+     * Tests {@link Sphere#calcIntersections(Ray, double)} with a max-distance limit.
+     */
     @Test
     void testFindIntersectionsWithMaxDistance() {
         Sphere sphere = new Sphere(new Point(1, 0, 0), 1d);

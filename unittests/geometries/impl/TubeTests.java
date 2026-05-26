@@ -276,6 +276,9 @@ class TubeTests {
                 "TC40");
     }
 
+    /**
+     * Tests {@link Tube#calcIntersections(Ray, double)} with a max-distance limit.
+     */
     @Test
     void testFindIntersectionsWithMaxDistance() {
         // Tube centered along the Z-axis with a radius of 1.0

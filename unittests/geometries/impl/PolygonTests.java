@@ -172,6 +172,9 @@ class PolygonTests {
                 "Ray on edge continuation should return null");
     }
 
+    /**
+     * Tests {@link Polygon#calcIntersections(Ray, double)} with a max-distance limit.
+     */
     @Test
     void testFindIntersectionsWithMaxDistance() {
         Triangle triangle = new Triangle(new Point(1, 0, 1), new Point(0, 1, 1), new Point(-1, -1, 1));

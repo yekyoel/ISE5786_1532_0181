@@ -154,6 +154,9 @@ class PlaneTests {
         assertNull(plane.findIntersections(new Ray(new Point(1, 1, 1), new Vector(1, 1, 1))), "BV15: Starts at plane");
     }
 
+    /**
+     * Tests {@link Plane#calcIntersections(Ray, double)} with a max-distance limit.
+     */
     @Test
     void testFindIntersectionsWithMaxDistance() {
         Plane plane = new Plane(new Point(0, 0, 1), new Vector(0, 0, 1));
