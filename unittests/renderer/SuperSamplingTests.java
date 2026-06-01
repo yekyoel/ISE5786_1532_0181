@@ -24,7 +24,7 @@ import scene.Scene;
  * the only difference is whether {@link PointLight#setSize(double)} and
  * {@link SpotLight#setSize(double)} are called on the light sources.</p>
  *
- * <p>Requirements satisfied:
+ * <p>Requirements satisfied:</p>
  * <ul>
  *   <li>≥ 10 distinct geometric bodies</li>
  *   <li>≥ 3 light sources at different positions</li>
@@ -33,14 +33,13 @@ import scene.Scene;
  *   <li>Distinct output file names for easy visual comparison</li>
  *   <li>Console render-time output for both runs</li>
  * </ul>
- * </p>
  *
- * <h3>Scene description — "The Gallery"</h3>
+ * <h2>Scene description — "The Gallery"</h2>
  * <p>A room with a polished floor, three walls, and a collection of objects.
  * Three area lights illuminate the room from different angles to create
  * clearly visible overlapping penumbra regions when soft shadows are enabled.</p>
  *
- * <h3>How to read the output images</h3>
+ * <h2>How to read the output images</h2>
  * <ul>
  *   <li>{@code softShadows_OFF.png} — sharp, hard-edged shadow boundaries.</li>
  *   <li>{@code softShadows_ON.png}  — soft, gradient penumbra at shadow edges,
@@ -69,7 +68,11 @@ class SuperSamplingTests {
      * Set to 0 for hard shadows, >0 for soft shadows.
      */
     private static final double MAIN_LIGHT_SIZE   = 15;
+
+    /** Medium-radius fill light that softens shadows from the side. */
     private static final double FILL_LIGHT_SIZE   = 10;
+
+    /** Small spotlight radius used for the accent light's tighter penumbra. */
     private static final double ACCENT_LIGHT_SIZE = 8;
 
     // ── Materials ──────────────────────────────────────────────────────────────
