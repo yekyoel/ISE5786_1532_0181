@@ -2,11 +2,7 @@ package renderer;
 
 import geometries.api.Intersectable.Intersection;
 import lighting.LightSource;
-import primitives.Color;
-import primitives.Double3;
-import primitives.Ray;
-import primitives.Util;
-import primitives.Vector;
+import primitives.*;
 import scene.Scene;
 
 import java.util.List;
@@ -29,6 +25,11 @@ class SimpleRayTracer extends RayTracerBase {
      */
     private static final Double3 INITIAL_K = Double3.ONE;
 
+    private static final int DEFAULT_SHADOW_SAMPLES=81;
+
+    private static final int DEFAULT_GLOSSY_SAMPLES=81;
+
+    private static final int TARGET_DISTANCE=100;
     /**
      * Creates a simple ray tracer for the given scene.
      *
@@ -76,23 +77,55 @@ class SimpleRayTracer extends RayTracerBase {
     }
 
     /**
-     * Calculate global effects by tracing reflection and transparency rays and
-     * accumulating their recursive color contribution.
+     * Computes recursive reflection and refraction (global) color contributions.
+     * <p>
+     * For each effect the material blur parameter selects the rendering mode:
+     * <ul>
+     *   <li>{@code kBlurR == 0} — perfect mirror: single ideal reflection ray.</li>
+     *   <li>{@code kBlurR  > 0} — glossy surface: beam of rays spread around the
+     *       ideal reflection direction via {@link #calcGlobalEffectBeam}.</li>
+     *   <li>{@code kBlurT == 0} — clear glass: single ideal refraction ray.</li>
+     *   <li>{@code kBlurT  > 0} — diffuse (blurry) glass: beam of rays spread
+     *       around the incoming ray direction via {@link #calcGlobalEffectBeam}.</li>
+     * </ul>
      *
-     * @param intersection the current surface intersection being shaded
-     * @param level        the remaining recursion depth for secondary rays
-     * @param k            the accumulated attenuation factor for recursion
-     * @return the color contribution from global effects
+     * @param gp    the current intersection (must have {@code n}, {@code v}, {@code vn} set)
+     * @param level remaining recursion depth
+     * @param k     accumulated attenuation factor
+     * @return the combined global color contribution
      */
-    private Color calcGlobalEffects(Intersection intersection, int level, Double3 k) {
-        Vector n = intersection.n;
-        Vector v = intersection.v;
+    private Color calcGlobalEffects(Intersection gp, int level, Double3 k) {
+        Color color = Color.BLACK;
 
-        Ray reflectionRay = constructReflectionRay(intersection, v, n);
-        Ray transparencyRay = constructTransparencyRay(intersection, v, n);
+        // ── Reflection ────────────────────────────────────────────────────────
+        Double3 kr = gp.material.kR;
+        if (!kr.product(k).isLowerThan(MIN_CALC_COLOR_K)) {
+            // Ideal specular-reflection direction: r = v − 2(v·n)n
+            Vector r = gp.v.subtract(gp.n.scale(2.0 * gp.v.dotProduct(gp.n)));
 
-        return calcGlobalEffect(reflectionRay, level, k, intersection.material.kR)
-                .add(calcGlobalEffect(transparencyRay, level, k, intersection.material.kT));
+            if (Util.isZero(gp.material.kBlurR)) {
+                // Perfect mirror — single ideal ray
+                color = color.add(calcGlobalEffect(new Ray(gp.point, r, gp.n), level, kr, k));
+            } else {
+                // Glossy surface — beam of rays around the ideal reflection direction
+                color = color.add(calcGlobalEffectBeam(gp, r, gp.material.kBlurR, level, kr, k));
+            }
+        }
+
+        // ── Refraction (transparency) ─────────────────────────────────────────
+        Double3 kt = gp.material.kT;
+        if (!kt.product(k).isLowerThan(MIN_CALC_COLOR_K)) {
+            // Ideal refraction continues along the incoming ray direction (v)
+            if (Util.isZero(gp.material.kBlurT)) {
+                // Clear glass — single ideal ray
+                color = color.add(calcGlobalEffect(new Ray(gp.point, gp.v, gp.n), level, kt, k));
+            } else {
+                // Diffuse glass — beam of rays around the incoming direction
+                color = color.add(calcGlobalEffectBeam(gp, gp.v, gp.material.kBlurT, level, kt, k));
+            }
+        }
+
+        return color;
     }
 
     /**
@@ -187,32 +220,106 @@ class SimpleRayTracer extends RayTracerBase {
     }
 
     /**
-     * Calculate transparency and the accumulated attenuation coefficient along the shadow ray.
-     * Uses the max-distance optimization (Bonus 3) to pre-filter distant objects.
+     * Computes the accumulated transparency factor (ktr) from the shaded point
+     * to the current light source.
+     * <p>
+     * Dispatches to {@link #singleRayTransparency} when {@code lightSize == 0}
+     * (point/directional light, hard shadow) or {@link #softShadowTransparency}
+     * when {@code lightSize > 0} (area light, soft shadow with penumbra).
      *
-     * @param intersection the intersection point on the surface
-     * @return the accumulated transparency coefficient (1.0 = fully lit, 0.0 = fully shaded)
+     * @param intersection the current intersection (light cache must be populated)
+     * @return kT factor: {@link Double3#ONE} = unblocked, {@link Double3#ZERO} = full shadow
      */
     private Double3 transparency(Intersection intersection) {
-        Vector lightDirection = intersection.l.scale(-1);
-        Ray shadowRay = new Ray(intersection.point, lightDirection, intersection.n);
+        Vector pointToLight = intersection.l.scale(-1);
+        double maxDistance = intersection.light.getDistance(intersection.point);
+        double lightSize = intersection.light.getSize();
 
-        double lightDistance = intersection.light.getDistance(intersection.point);
-        List<Intersection> intersections = _scene.geometries.calcIntersections(shadowRay, lightDistance);
+        if (Util.isZero(lightSize))
+            return singleRayTransparency(intersection.point, pointToLight,
+                    intersection.n, maxDistance);
 
-        if (intersections == null) return Double3.ONE;
+        return softShadowTransparency(intersection, pointToLight, maxDistance, lightSize);
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    //  Shadows — single-ray helper
+    // ──────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Casts a single shadow ray and returns the accumulated transparency factor
+     * of every geometry it passes through up to {@code maxDistance}.
+     *
+     * @param origin      surface point from which the shadow ray is fired
+     * @param direction   direction toward the light source (or sample point)
+     * @param normal      surface normal, used to offset the ray origin by ±DELTA
+     * @param maxDistance maximum distance to check for blocking geometry
+     * @return {@link Double3#ONE} if unblocked, {@link Double3#ZERO} if fully
+     * blocked, or a component-wise product of blocking materials' kT values
+     */
+    private Double3 singleRayTransparency(Point origin, Vector direction,
+                                          Vector normal, double maxDistance) {
+        Ray shadowRay = new Ray(origin, direction, normal);
+        var hits = _scene.geometries.calcIntersections(shadowRay, maxDistance);
+
+        if (hits == null) return Double3.ONE;
 
         Double3 ktr = Double3.ONE;
-        for (Intersection geo : intersections) {
-            // Accumulated multiplication of kT values of the objects blocking the light
-            ktr = ktr.product(geo.geometry.getMaterial().kT);
-
-            // Performance optimization: early exit if the light is almost completely blocked
-            if (ktr.isLowerThan(MIN_CALC_COLOR_K)) {
-                return Double3.ZERO;
-            }
+        for (Intersection si : hits) {
+            ktr = ktr.product(si.material.kT);
+            if (ktr.isLowerThan(MIN_CALC_COLOR_K)) return Double3.ZERO;
         }
         return ktr;
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    //  Shadows — soft-shadow beam helper
+    // ──────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Computes soft shadows by sampling {@link #DEFAULT_SHADOW_SAMPLES} points on
+     * the light source area and averaging the per-sample transparency factors.
+     * <p>
+     * The target area is centered at the light position with its basis orthogonal
+     * to {@code intersection.l}.  Wrong-side samples (the "sunset effect") contribute
+     * {@code 0} ktr but are counted in the denominator, as required by the spec.
+     *
+     * @param intersection the current intersection (light cache must be populated)
+     * @param pointToLight direction from surface toward the light center
+     * @param maxDistance  distance from surface to the light center
+     * @param lightSize    radius of the light source area (must be &gt; 0)
+     * @return the averaged ktr across all samples
+     */
+    private Double3 softShadowTransparency(Intersection intersection,
+                                           Vector pointToLight,
+                                           double maxDistance,
+                                           double lightSize) {
+        Point lightCenter = intersection.point.add(pointToLight.scale(maxDistance));
+
+        List<Point> lightSamples = new Blackboard()
+                .setCenter(lightCenter)
+                .setSize(lightSize)
+                .setNumSamples(DEFAULT_SHADOW_SAMPLES)
+                .buildBasis(intersection.l)
+                .getSamplePoints();
+
+        if (lightSamples.isEmpty()) return Double3.ONE;
+
+        double signRef = Util.alignZero(intersection.n.dotProduct(pointToLight));
+
+        Double3 ktrSum = Double3.ZERO;
+        for (Point sample : lightSamples) {
+            Vector rawDir = sample.subtract(intersection.point);
+            double sampleDotN = Util.alignZero(intersection.n.dotProduct(rawDir));
+            if (signRef * sampleDotN <= 0) continue;  // wrong side — zero contribution
+
+            double sampleDist = rawDir.length();
+            ktrSum = ktrSum.add(
+                    singleRayTransparency(intersection.point, rawDir,
+                            intersection.n, sampleDist));
+        }
+
+        return ktrSum.divide(lightSamples.size());
     }
 
     /**
@@ -265,5 +372,79 @@ class SimpleRayTracer extends RayTracerBase {
             }
         }
         return true;
+    }
+    /**
+     * Computes a glossy reflection or diffuse transparency contribution by tracing
+     * a beam of rays distributed around the ideal secondary ray direction.
+     *
+     * <h4>Algorithm</h4>
+     * <ol>
+     *   <li>A virtual target area is placed on the ideal secondary ray at distance
+     *       {@link #TARGET_DISTANCE}; its half-extent equals {@code blur}.</li>
+     *   <li>A {@link Blackboard} generates {@link #DEFAULT_GLOSSY_SAMPLES} sample
+     *       points across that area, with a basis orthogonal to {@code idealDir}.</li>
+     *   <li>For each sample, a secondary ray is cast from the surface point toward
+     *       the sample.  Rays that cross to the wrong side of the surface
+     *       ({@code n · sampleDir} opposite sign to {@code n · idealDir}) are
+     *       discarded — preventing light from leaking through at grazing angles.</li>
+     *   <li>The colors of all valid rays (each already attenuated by {@code kx}
+     *       inside {@link #calcGlobalEffect}) are averaged.  If no valid sample
+     *       exists, the single ideal ray is used as a fallback.</li>
+     * </ol>
+     *
+     * <p><b>Note:</b> unlike soft shadows, wrong-side samples are excluded from
+     * <em>both</em> numerator and denominator, because for glossy surfaces the
+     * average represents the fraction of the visible cone — not the fraction of a
+     * light disk.</p>
+     *
+     * @param gp       the current intersection
+     * @param idealDir the ideal secondary ray direction (normalized)
+     * @param blur     the material blur parameter ({@code kBlurR} or {@code kBlurT});
+     *                 interpreted as the target area half-extent at {@link #TARGET_DISTANCE}
+     * @param level    remaining recursion depth
+     * @param kx       material effect coefficient ({@code kR} or {@code kT})
+     * @param k        accumulated attenuation factor
+     * @return the averaged attenuated color contribution of the beam
+     */
+    private Color calcGlobalEffectBeam(Intersection gp, Vector idealDir, double blur,
+                                       int level, Double3 kx, Double3 k) {
+        // Place the virtual target area along the ideal secondary ray
+        Point targetCenter = gp.point.add(idealDir.scale(TARGET_DISTANCE));
+
+        // Build the sampling region orthogonal to the ideal ray direction
+        List<Point> samples = new Blackboard()
+                .setCenter(targetCenter)
+                .setSize(blur)                    // half-extent at TARGET_DISTANCE
+                .setNumSamples(DEFAULT_GLOSSY_SAMPLES)
+                .buildBasis(idealDir)             // area normal = ideal direction
+                .getSamplePoints();
+
+        // Reference: sign of n · idealDir tells which surface side is "correct"
+        double idealDotN = Util.alignZero(gp.n.dotProduct(idealDir));
+
+        Color color = Color.BLACK;
+        int validCount = 0;
+
+        for (Point sample : samples) {
+            // Vector from surface point to this target sample
+            Vector dirToSample = sample.subtract(gp.point);
+
+            // Filter: discard rays that cross to the wrong surface side
+            // (n · dirToSample must share the sign of n · idealDir)
+            double sampleDotN = Util.alignZero(gp.n.dotProduct(dirToSample));
+            if (idealDotN * sampleDotN <= 0) continue; // wrong side — skip
+
+            // Trace this secondary ray; calcGlobalEffect scales result by kx
+            Ray beamRay = new Ray(gp.point, dirToSample, gp.n);
+            color = color.add(calcGlobalEffect(beamRay, level, kx, k));
+            validCount++;
+        }
+
+        // Fallback: if all samples filtered (extreme grazing angle) use the ideal ray
+        if (validCount == 0)
+            return calcGlobalEffect(new Ray(gp.point, idealDir, gp.n), level, kx, k);
+
+        // Average over valid-sample colors only
+        return color.reduce(validCount);
     }
 }

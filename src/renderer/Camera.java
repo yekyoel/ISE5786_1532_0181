@@ -6,7 +6,9 @@ import primitives.Ray;
 import primitives.Vector;
 import scene.Scene;
 
+import java.util.LinkedList;
 import java.util.MissingResourceException;
+import java.util.stream.IntStream;
 
 import static primitives.Util.isZero;
 
@@ -47,6 +49,10 @@ public class Camera implements Cloneable {
     /** Calculated height of one pixel in world units. */
     private double pixelHeight;
 
+    private int _threadsCount=0;
+    private static final int SPARE_THREADS=2;
+    private double _printInterval=0;
+    private PixelManager pixelManager;
     /**
      * Private default constructor to prevent direct instantiation without Builder.
      */
@@ -90,12 +96,78 @@ public class Camera implements Cloneable {
         return super.clone();
     }
 
+    /**
+     * Renders the scene into the image writer using the configured threading mode.
+     *
+     * @return this camera instance for method chaining
+     */
     public Camera renderImage() {
-        for (int i = 0; i < nY; i++) {
-            for (int j = 0; j < nX; j++) {
+        pixelManager = new PixelManager(nY, nX, _printInterval);
+        return switch (_threadsCount) {
+            case 0 -> renderImageNoThreads();
+            case -1 -> renderImageStream();
+            default -> renderImageRawThreads();
+        };
+    }
+
+    /**
+     * Renders the image using the caller's thread only (no parallelism).
+     * Used when {@link #_threadsCount} is {@code 0}.
+     *
+     * @return this camera instance for method chaining
+     */
+    private Camera renderImageNoThreads() {
+        for (int i = 0; i < nY; i++)
+            for (int j = 0; j < nX; j++)
                 castRay(j, i);
-            }
+        return this;
+    }
+
+    /**
+     * Renders the image using Java's parallel {@link IntStream}.
+     * The JVM manages thread creation and scheduling automatically based on
+     * the available processor count.
+     * Used when {@link #_threadsCount} is {@code -1}.
+     *
+     * @return this camera instance for method chaining
+     */
+    private Camera renderImageStream() {
+        IntStream.range(0, nY).parallel()
+                .forEach(i -> IntStream.range(0, nX).parallel()
+                        .forEach(j -> castRay(j, i)));
+        return this;
+    }
+
+    /**
+     * Renders the image using {@link #_threadsCount} explicitly created
+     * {@link Thread} objects. Each thread repeatedly asks the {@link PixelManager}
+     * for the next unrendered pixel until all pixels are done.
+     * Used when {@link #_threadsCount} is greater than {@code 0}.
+     *
+     * @return this camera instance for method chaining
+     */
+    private Camera renderImageRawThreads() {
+        var threads = new LinkedList<Thread>();
+        int count = _threadsCount;
+
+        // Create the requested number of worker threads
+        while (count-- > 0)
+            threads.add(new Thread(() -> {
+                PixelManager.Pixel pixel;
+                // Each thread works until no pixels remain
+                while ((pixel = pixelManager.nextPixel()) != null)
+                    castRay(pixel.col(), pixel.row());
+            }));
+
+        // Start all threads
+        for (var thread : threads) thread.start();
+
+        // Wait for every thread to finish before returning
+        try {
+            for (var thread : threads) thread.join();
+        } catch (InterruptedException ignored) {
         }
+
         return this;
     }
 
@@ -105,6 +177,13 @@ public class Camera implements Cloneable {
         imageWriter.writePixel(j, i, color);
     }
 
+    /**
+     * Renders a grid on the image at the specified interval.
+     *
+     * @param interval the interval between grid lines (in pixels)
+     * @param color    the color of the grid lines
+     * @return this Camera instance (for method chaining)
+     */
     public Camera printGrid(int interval, Color color) {
         for (int i = 0; i < nY; i++) {
             for (int j = 0; j < nX; j++) {
@@ -116,6 +195,11 @@ public class Camera implements Cloneable {
         return this;
     }
 
+    /**
+     * Writes the rendered image to a file.
+     *
+     * @param imageName the name of the output image file
+     */
     public void writeToImage(String imageName) {
         imageWriter.writeToImage(imageName);
     }
@@ -124,6 +208,9 @@ public class Camera implements Cloneable {
      * Builder class for constructing a Camera instance.
      */
     public static class Builder {
+        /**
+         * Constructs a new Builder instance.
+         */
         public Builder() {
         }
 
@@ -133,11 +220,24 @@ public class Camera implements Cloneable {
         private Point target;
         private Vector up = Vector.AXIS_Y;
 
+        /**
+         * Sets the camera location.
+         *
+         * @param location the camera position
+         * @return this Builder instance
+         */
         public Builder setLocation(Point location) {
             camera.p0 = location;
             return this;
         }
 
+        /**
+         * Sets the camera direction using a direction vector and up vector.
+         *
+         * @param to the forward direction vector
+         * @param up the up direction vector
+         * @return this Builder instance
+         */
         public Builder setDirection(Vector to, Vector up) {
             this.to = to;
             this.up = up;
@@ -145,6 +245,13 @@ public class Camera implements Cloneable {
             return this;
         }
 
+        /**
+         * Sets the camera direction using a target point and up vector.
+         *
+         * @param target the target point to look at
+         * @param up     the up direction vector
+         * @return this Builder instance
+         */
         public Builder setDirection(Point target, Vector up) {
             this.target = target;
             this.up = up;
@@ -152,6 +259,12 @@ public class Camera implements Cloneable {
             return this;
         }
 
+        /**
+         * Sets the camera direction using only a target point (uses default up vector).
+         *
+         * @param target the target point to look at
+         * @return this Builder instance
+         */
         public Builder setDirection(Point target) {
             this.target = target;
             this.up = Vector.AXIS_Y;
@@ -159,23 +272,50 @@ public class Camera implements Cloneable {
             return this;
         }
 
+        /**
+         * Sets the view plane size.
+         *
+         * @param width  the width of the view plane
+         * @param height the height of the view plane
+         * @return this Builder instance
+         */
         public Builder setVpSize(double width, double height) {
             camera.width = width;
             camera.height = height;
             return this;
         }
 
+        /**
+         * Sets the distance from the camera to the view plane.
+         *
+         * @param distance the view plane distance
+         * @return this Builder instance
+         */
         public Builder setVpDistance(double distance) {
             camera.distance = distance;
             return this;
         }
 
+        /**
+         * Sets the image resolution in pixels.
+         *
+         * @param nX the horizontal resolution (width in pixels)
+         * @param nY the vertical resolution (height in pixels)
+         * @return this Builder instance
+         */
         public Builder setResolution(int nX, int nY) {
             camera.nX = nX;
             camera.nY = nY;
             return this;
         }
 
+        /**
+         * Sets the ray tracer for the camera.
+         *
+         * @param scene the scene to trace rays in
+         * @param type  the type of ray tracer to use
+         * @return this Builder instance
+         */
         public Builder setRayTracer(Scene scene, RayTracerType type) {
             if (type == RayTracerType.SIMPLE) {
                 camera.rayTracer = new SimpleRayTracer(scene);
@@ -331,6 +471,11 @@ public class Camera implements Cloneable {
             camera.imageWriter = new ImageWriter(camera.nX, camera.nY);
         }
 
+        /**
+         * Builds and returns the configured Camera instance.
+         *
+         * @return the constructed Camera
+         */
         public Camera build() {
             checkResolution();
             // checkLocationAndDirection maps builder state into the camera's basis vectors correctly
@@ -347,6 +492,52 @@ public class Camera implements Cloneable {
             } catch (CloneNotSupportedException e) {
                 return null;
             }
+        }
+
+        // ── Multi-threading ───────────────────────────────────────────────────
+
+        /**
+         * Configures the multi-threading rendering mode.
+         * <p>
+         * Parameter semantics:
+         * <ul>
+         *   <li>{@code -2} – raw threads, count set to {@code availableProcessors() − SPARE_THREADS}</li>
+         *   <li>{@code -1} – Java parallel stream (JVM chooses thread count)</li>
+         *   <li>{@code  0} – single-threaded (default)</li>
+         *   <li>{@code ≥1} – raw threads, exactly this many</li>
+         * </ul>
+         *
+         * @param threads threading mode / explicit thread count
+         * @return this builder for chaining
+         * @throws IllegalArgumentException if {@code threads} is less than {@code -2}
+         */
+        public Builder setMultithreading(int threads) {
+            if (threads < -2)
+                throw new IllegalArgumentException("Multithreading parameter must be -2 or higher");
+            if (threads == -2) {
+                // Automatic: reserve SPARE_THREADS cores for the JVM
+                int cores = Runtime.getRuntime().availableProcessors() - SPARE_THREADS;
+                camera._threadsCount = cores <= 2 ? 1 : cores; // at least 1 thread
+            } else {
+                camera._threadsCount = threads;
+            }
+            return this;
+        }
+
+        /**
+         * Sets the console progress-print interval during rendering.
+         * Pass {@code 0} to suppress all progress output.
+         *
+         * @param interval print interval as a percentage of total pixels (e.g. {@code 1}
+         *                 prints a line every 1 % of the image)
+         * @return this builder for chaining
+         * @throws IllegalArgumentException if {@code interval} is negative
+         */
+        public Builder setDebugPrint(double interval) {
+            if (interval < 0)
+                throw new IllegalArgumentException("Print interval must be non-negative");
+            camera._printInterval = interval;
+            return this;
         }
     }
 }

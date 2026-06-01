@@ -93,4 +93,10 @@ public class Point {
 	public String toString() {
 		return _xyz.toString();
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int hashCode(){return _xyz.hashCode();}
 }

@@ -31,6 +31,15 @@ public class Material {
      */
     public Double3 kR = Double3.ZERO;
 
+    /**
+     * Blur radius for reflection (used for soft reflections).
+     */
+    public double kBlurR=0;
+
+    /**
+     * Blur radius for transmission (used for soft refractions).
+     */
+    public double kBlurT=0;
 
     /**
      * Default material with sensible defaults (no diffuse/specular, unit ambient).
@@ -156,6 +165,28 @@ public class Material {
      */
     public Material setKr(double kR) {
         this.kR = new Double3(kR);
+        return this;
+    }
+
+    /**
+     * Set blur radius for reflection (soft reflections).
+     *
+     * @param blurR the blur radius for reflections
+     * @return this Material (for chaining)
+     */
+    public Material setBlurR(double blurR){
+        kBlurR=blurR;
+        return this;
+    }
+
+    /**
+     * Set blur radius for transmission (soft refractions).
+     *
+     * @param blurT the blur radius for transmissions
+     * @return this Material (for chaining)
+     */
+    public Material setBlurT(double blurT){
+        kBlurT=blurT;
         return this;
     }
 }

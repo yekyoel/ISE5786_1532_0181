@@ -323,18 +323,22 @@ class LightsTests {
     void testTrianglesMultiLights() {
         _scene2.geometries.add(TRIANGLE1, TRIANGLE2);
 
-        // Adding 3 different light sources with distinct colors and positions
+        // Adding 4 distinct light sources strategically separated to see each color clearly
         _scene2.lights.addAll(List.of(
-                // Greenish directional light
-                new DirectionalLight(new Color(100, 250, 100), new Vector(0, -1, -1)),
+                // 1. Toned-down Greenish directional light (prevents washing out other colors)
+                new DirectionalLight(new Color(0, 130, 0), new Vector(0, -1, -5)),
 
-                // Reddish point light
-                new PointLight(new Color(500, 100, 100), new Point(10, -10, -70))
-                        .setKl(0.0005).setKq(0.0005),
+                // 2. Strong Reddish point light positioned near the right side
+                new PointLight(new Color(800, 100, 100), new Point(30, 10, -50))
+                        .setKl(0.0001).setKq(0.00005),
 
-                // Bluish spotlight
-                new SpotLight(new Color(100, 100, 500), new Point(-10, -10, -70), new Vector(-2, -2, -1))
-                        .setKl(0.001).setKq(0.0001)
+                // CHANGED: Bluish spotlight positioned high-center, angled down and left
+                new SpotLight(new Color(100, 100, 600), new Point(0, 40, -50), new Vector(-1.2, -1.5, -1))
+                        .setKl(0.0001).setKq(0.00005),
+
+                // CHANGED: Purple spotlight positioned to the right, angled sharply down and left
+                new SpotLight(new Color(250, 20, 280), new Point(40, 20, -50), new Vector(-2, -1.2, -1))
+                        .setKl(0.0001).setKq(0.00005)
         ));
 
         _camera2.setResolution(500, 500)
@@ -342,4 +346,5 @@ class LightsTests {
                 .renderImage()
                 .writeToImage("lightTrianglesMulti");
     }
+
 }

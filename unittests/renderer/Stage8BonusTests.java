@@ -177,7 +177,7 @@ class Stage8BonusTests {
                 new Point(-75, 0, -137)
         );
         table.setEmission(new Color(12, 4, 148)) // Dark Blue
-                .setMaterial(new Material().setKd(0.2).setKs(0.2).setShininess(10).setKr(0.2));
+                .setMaterial(new Material().setKd(0.7).setKs(0.0).setShininess(1).setKr(0.0));
 // --- NEW: White Table Lines (Elevated to Y = 0.1 to prevent Z-fighting) ---
         Material lineMat = new Material().setKd(0.8).setKs(0.2).setShininess(10);
         Color lineColor = new Color(250, 250, 250); // Crisp White

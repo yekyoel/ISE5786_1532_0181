@@ -54,7 +54,7 @@ public class Cylinder extends Tube {
 
 	/**
 	 * Calculates the intersections between the ray and the finite cylinder.
-	 * * @param ray the ray to intersect with the cylinder
+	 * @param ray the ray to intersect with the cylinder
 	 * @param maxDistance maximum intersection distance
 	 * @return a list of intersection objects, or null if there are no intersections
 	 */

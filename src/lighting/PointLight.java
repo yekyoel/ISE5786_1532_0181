@@ -18,6 +18,7 @@ public class PointLight extends Light implements LightSource {
      */
     private double kC = 1, kL = 0, kQ = 0;
 
+    private double _size=0;
     /**
      * Constructs a point light.
      *
@@ -62,6 +63,17 @@ public class PointLight extends Light implements LightSource {
         return this;
     }
 
+    /**
+     * Set the size of the light source (for soft light effects).
+     *
+     * @param size the size of the light source
+     * @return this PointLight instance (for method chaining)
+     */
+    public PointLight setSize(double size){
+        _size=size;
+        return this;
+    }
+
     @Override
     public Color getIntensity(Point p) {
         double d = position.distance(p);
@@ -80,4 +92,7 @@ public class PointLight extends Light implements LightSource {
     public double getDistance(Point point) {
         return position.distance(point);
     }
+
+    @Override
+    public double getSize(){return _size;}
 }

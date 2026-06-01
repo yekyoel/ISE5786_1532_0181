@@ -73,4 +73,9 @@ public class SpotLight extends PointLight {
 
         return pointIntensity.scale(factor);
     }
+    @Override
+    public SpotLight setSize(double size){
+        super.setSize(size);
+        return this;
+    }
 }
