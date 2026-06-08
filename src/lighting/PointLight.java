@@ -18,6 +18,9 @@ public class PointLight extends Light implements LightSource {
      */
     private double kC = 1, kL = 0, kQ = 0;
 
+    /**
+     * Radius of the sampled light area; {@code 0} keeps the light point-like.
+     */
     private double _size=0;
     /**
      * Constructs a point light.

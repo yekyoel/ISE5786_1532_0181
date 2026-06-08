@@ -17,14 +17,34 @@ import primitives.Ray;
 import primitives.Vector;
 import scene.Scene;
 
+/**
+ * End-to-end render tests for the ping-pong scene, comparing hard and soft shadows.
+ */
 class PingPongSSTests {
 
+    /**
+     * Render resolution kept high for visible shadow-quality comparisons.
+     */
     private static final int RESOLUTION = 1000; // Keep high-res for final comparison
 
-    // Light source radius sizes for soft-shadow penumbras
-    private static final double SUN_LIGHT_SIZE  = 22.0;
+    /**
+     * Sun-like spotlight radius used when soft shadows are enabled.
+     */
+    private static final double SUN_LIGHT_SIZE = 22.0;
+    /**
+     * Ball-fill light radius used to soften the highlight around the ball.
+     */
     private static final double BALL_LIGHT_SIZE = 6.0;
 
+    /**
+     * Default constructor required by the test framework and Javadoc generation.
+     */
+    PingPongSSTests() {
+    }
+
+    /**
+     * Renders the ping-pong scene with hard shadows to generate the baseline image.
+     */
     @Test
     void testPingPongMatchOff() {
         Scene scene = buildPingPongScene(false);
@@ -47,6 +67,9 @@ class PingPongSSTests {
         System.out.printf("[PING-PONG OFF] Render time: %.2f seconds%n", elapsed / 1000.0);
     }
 
+    /**
+     * Renders the ping-pong scene with soft shadows enabled for comparison.
+     */
     @Test
     void testPingPongMatchOn() {
         Scene scene = buildPingPongScene(true);
@@ -69,6 +92,12 @@ class PingPongSSTests {
         System.out.printf("[PING-PONG ON]  Render time: %.2f seconds%n", elapsed / 1000.0);
     }
 
+    /**
+     * Builds the ping-pong scene with either point-sized or area-sized lights.
+     *
+     * @param softShadows {@code true} for area lights, {@code false} for hard shadows
+     * @return a fully configured scene ready to render
+     */
     private Scene buildPingPongScene(boolean softShadows) {
         // 1. Initialize Scene & "Sky" Background
         Scene scene = new Scene("Ping Pong Match");
@@ -150,8 +179,8 @@ class PingPongSSTests {
         Point p1br = new Point(20, -15, -180);
         Triangle p1Front = (Triangle) new Triangle(p1Apex, p1fl, p1fr).setEmission(p1Color).setMaterial(p1Mat);
         Triangle p1Right = (Triangle) new Triangle(p1Apex, p1fr, p1br).setEmission(p1Color).setMaterial(p1Mat);
-        Triangle p1Back  = (Triangle) new Triangle(p1Apex, p1br, p1bl).setEmission(p1Color).setMaterial(p1Mat);
-        Triangle p1Left  = (Triangle) new Triangle(p1Apex, p1bl, p1fl).setEmission(p1Color).setMaterial(p1Mat);
+        Triangle p1Back = (Triangle) new Triangle(p1Apex, p1br, p1bl).setEmission(p1Color).setMaterial(p1Mat);
+        Triangle p1Left = (Triangle) new Triangle(p1Apex, p1bl, p1fl).setEmission(p1Color).setMaterial(p1Mat);
 
         Cylinder p1PaddleFace = new Cylinder(6, new Ray(new Point(-30, 15, -142), new Vector(0, 0, 1)), 1);
         p1PaddleFace.setEmission(new Color(10, 10, 10)).setMaterial(new Material().setKd(0.5).setKs(0.5).setShininess(20));
@@ -170,8 +199,8 @@ class PingPongSSTests {
         Point p2br = new Point(-20, -15, 180);
         Triangle p2Front = (Triangle) new Triangle(p2Apex, p2fl, p2fr).setEmission(p2Color).setMaterial(p2Mat);
         Triangle p2Right = (Triangle) new Triangle(p2Apex, p2fr, p2br).setEmission(p2Color).setMaterial(p2Mat);
-        Triangle p2Back  = (Triangle) new Triangle(p2Apex, p2br, p2bl).setEmission(p2Color).setMaterial(p2Mat);
-        Triangle p2Left  = (Triangle) new Triangle(p2Apex, p2bl, p2fl).setEmission(p2Color).setMaterial(p2Mat);
+        Triangle p2Back = (Triangle) new Triangle(p2Apex, p2br, p2bl).setEmission(p2Color).setMaterial(p2Mat);
+        Triangle p2Left = (Triangle) new Triangle(p2Apex, p2bl, p2fl).setEmission(p2Color).setMaterial(p2Mat);
 
         Cylinder p2PaddleFace = new Cylinder(6, new Ray(new Point(30, 15, 142), new Vector(0, 0, -1)), 1);
         p2PaddleFace.setEmission(new Color(150, 20, 20)).setMaterial(new Material().setKd(0.5).setKs(0.5).setShininess(20));

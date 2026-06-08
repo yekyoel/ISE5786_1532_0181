@@ -25,10 +25,19 @@ class SimpleRayTracer extends RayTracerBase {
      */
     private static final Double3 INITIAL_K = Double3.ONE;
 
+    /**
+     * Default number of samples used for soft-shadow beams when a light requests area sampling.
+     */
     private static final int DEFAULT_SHADOW_SAMPLES=81;
 
+    /**
+     * Default number of samples used for glossy/reflection-beam sampling.
+     */
     private static final int DEFAULT_GLOSSY_SAMPLES=81;
 
+    /**
+     * Fallback distance used by certain beam-generation helpers when they need a reference scale.
+     */
     private static final int TARGET_DISTANCE=100;
     /**
      * Creates a simple ray tracer for the given scene.

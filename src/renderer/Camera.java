@@ -49,9 +49,22 @@ public class Camera implements Cloneable {
     /** Calculated height of one pixel in world units. */
     private double pixelHeight;
 
+    /**
+     * Rendering mode selector: {@code 0} = single-thread, {@code -1} = parallel stream,
+     * positive values = explicit raw-thread count, {@code -2} = auto raw-thread count.
+     */
     private int _threadsCount=0;
+    /**
+     * Number of CPU cores to keep free when auto-selecting raw worker threads.
+     */
     private static final int SPARE_THREADS=2;
+    /**
+     * Progress-print interval in seconds; {@code 0} disables periodic progress output.
+     */
     private double _printInterval=0;
+    /**
+     * Helper that tracks remaining pixels and optionally reports rendering progress.
+     */
     private PixelManager pixelManager;
     /**
      * Private default constructor to prevent direct instantiation without Builder.
@@ -171,6 +184,12 @@ public class Camera implements Cloneable {
         return this;
     }
 
+    /**
+     * Traces and writes the color for a single pixel.
+     *
+     * @param j pixel column index
+     * @param i pixel row index
+     */
     private void castRay(int j, int i) {
         Ray ray = constructRay(j, i);
         Color color = rayTracer.traceRay(ray);
@@ -214,10 +233,14 @@ public class Camera implements Cloneable {
         public Builder() {
         }
 
+        /** The camera being configured by this builder. */
         private final Camera camera = new Camera();
 
+        /** Explicit forward direction, used when the builder is configured by vector. */
         private Vector to;
+        /** Look-at target point, used when the builder is configured by point. */
         private Point target;
+        /** Up vector used to construct the camera basis; defaults to {@link Vector#AXIS_Y}. */
         private Vector up = Vector.AXIS_Y;
 
         /**
@@ -421,6 +444,9 @@ public class Camera implements Cloneable {
 
         // =========================================================
 
+        /**
+         * Validates the configured location/direction and computes the camera basis vectors.
+         */
         private void checkLocationAndDirection() {
             if (camera.p0 == null) {
                 throw new MissingResourceException("Missing camera location", Camera.class.getName(), "location");
@@ -451,6 +477,9 @@ public class Camera implements Cloneable {
             camera.vUp = camera.vRight.crossProduct(camera.vTo).normalize();
         }
 
+        /**
+         * Validates the view plane settings and precomputes pixel geometry.
+         */
         private void checkViewPlane() {
             if (camera.width <= 0 || camera.height <= 0) {
                 throw new IllegalArgumentException("View plane size dimensions must be strictly positive.");
@@ -464,6 +493,9 @@ public class Camera implements Cloneable {
             camera.pixelHeight = camera.height / camera.nY;
         }
 
+        /**
+         * Validates the resolution and creates the image writer backing store.
+         */
         private void checkResolution() {
             if (camera.nX <= 0 || camera.nY <= 0) {
                 throw new IllegalArgumentException("Resolution values must be strictly positive.");
