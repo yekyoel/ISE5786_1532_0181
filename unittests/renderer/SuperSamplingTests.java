@@ -1,19 +1,12 @@
 package renderer;
 
-import geometries.impl.Cylinder;
-import geometries.impl.Plane;
-import geometries.impl.Sphere;
-import geometries.impl.Triangle;
+import geometries.impl.*;
 import lighting.AmbientLight;
 import lighting.DirectionalLight;
 import lighting.PointLight;
 import lighting.SpotLight;
 import org.junit.jupiter.api.Test;
-import primitives.Color;
-import primitives.Material;
-import primitives.Point;
-import primitives.Ray;
-import primitives.Vector;
+import primitives.*;
 import scene.Scene;
 
 /**
@@ -26,116 +19,74 @@ import scene.Scene;
  *
  * <p>Requirements satisfied:
  * <ul>
- *   <li>≥ 10 distinct geometric bodies</li>
- *   <li>≥ 3 light sources at different positions</li>
- *   <li>Two test methods for the same scene: one without the improvement,
- *       one with the improvement</li>
- *   <li>Distinct output file names for easy visual comparison</li>
- *   <li>Console render-time output for both runs</li>
+ * <li>≥ 10 distinct geometric bodies</li>
+ * <li>≥ 3 light sources at different positions</li>
+ * <li>Two test methods for the same scene: one without the improvement,
+ * one with the improvement</li>
+ * <li>Distinct output file names for easy visual comparison</li>
+ * <li>Console render-time output for both runs</li>
  * </ul>
  * </p>
- *
- * <h3>Scene description — "The Gallery"</h3>
- * <p>A room with a polished floor, three walls, and a collection of objects.
- * Three area lights illuminate the room from different angles to create
- * clearly visible overlapping penumbra regions when soft shadows are enabled.</p>
- *
- * <h3>How to read the output images</h3>
- * <ul>
- *   <li>{@code softShadows_OFF.png} — sharp, hard-edged shadow boundaries.</li>
- *   <li>{@code softShadows_ON.png}  — soft, gradient penumbra at shadow edges,
- *       especially visible around the sphere and cylinder bases.</li>
- * </ul>
  */
 class SuperSamplingTests {
 
-    /**
-     * Default constructor to satisfy the JavaDoc generator.
-     */
+    /** Default constructor to satisfy the JavaDoc generator. */
     SuperSamplingTests() {}
 
     // ──────────────────────────────────────────────────────────────────────────
     //  Shared scene constants
     // ──────────────────────────────────────────────────────────────────────────
 
-    /** Render resolution — use 800 for final images, 400 for quick drafts. */
+    /** Render resolution — use 600-800 for final images, 400 for quick drafts. */
     private static final int RESOLUTION = 600;
 
     /** Number of shadow-beam samples per light when soft shadows are enabled. */
     private static final int SHADOW_SAMPLES = 81;
 
-    /**
-     * Radius of the main overhead area light.
-     * Set to 0 for hard shadows, >0 for soft shadows.
-     */
+    /** Radius sizes for the area lights (enabled only in the "ON" test). */
     private static final double MAIN_LIGHT_SIZE   = 15;
     private static final double FILL_LIGHT_SIZE   = 10;
     private static final double ACCENT_LIGHT_SIZE = 8;
 
     // ── Materials ──────────────────────────────────────────────────────────────
 
-    /** Polished reflective floor. */
     private static final Material FLOOR_MAT = new Material()
-            .setKd(0.4).setKs(0.5).setShininess(80).setKr(0.15);
+            .setKd(0.5).setKs(0.5).setShininess(60).setKr(0.2); // Semi-reflective floor
 
-    /** Plain matte wall. */
     private static final Material WALL_MAT = new Material()
-            .setKd(0.7).setKs(0.1).setShininess(10);
+            .setKd(0.8).setKs(0.1).setShininess(10); // Matte backdrop
 
-    /** Glossy metallic sphere. */
-    private static final Material METAL_MAT = new Material()
-            .setKd(0.2).setKs(0.7).setShininess(200).setKr(0.6);
-
-    /** Translucent blue glass. */
     private static final Material GLASS_MAT = new Material()
-            .setKd(0.1).setKs(0.5).setShininess(150).setKt(0.7).setKr(0.1);
+            .setKd(0.1).setKs(0.8).setShininess(200).setKt(0.85).setKr(0.1); // Highly transparent
 
-    /** Opaque red matte. */
-    private static final Material RED_MAT = new Material()
-            .setKd(0.6).setKs(0.3).setShininess(40);
+    private static final Material MIRROR_MAT = new Material()
+            .setKd(0.1).setKs(0.8).setShininess(200).setKr(0.85); // Perfect mirror
 
-    /** Opaque green. */
-    private static final Material GREEN_MAT = new Material()
-            .setKd(0.6).setKs(0.2).setShininess(30);
+    private static final Material MATTE_CYAN_MAT = new Material()
+            .setKd(0.7).setKs(0.1).setShininess(10); // Flat cyan
 
-    /** White matte pedestal. */
-    private static final Material WHITE_MAT = new Material()
-            .setKd(0.8).setKs(0.1).setShininess(10);
+    private static final Material GLOSSY_ORANGE_MAT = new Material()
+            .setKd(0.5).setKs(0.6).setShininess(80); // Shiny plastic orange
 
-    /** Yellow-gold shiny. */
-    private static final Material GOLD_MAT = new Material()
-            .setKd(0.3).setKs(0.7).setShininess(120).setKr(0.2);
-
-    /** Purple matte. */
-    private static final Material PURPLE_MAT = new Material()
-            .setKd(0.7).setKs(0.2).setShininess(20);
+    private static final Material GLOSSY_PURPLE_MAT = new Material()
+            .setKd(0.6).setKs(0.5).setShininess(70); // Shiny plastic purple
 
     // ──────────────────────────────────────────────────────────────────────────
     //  Tests — without improvement (hard shadows)
     // ──────────────────────────────────────────────────────────────────────────
 
-    /**
-     * Renders the showcase scene with point-source lights (size = 0), producing
-     * hard, perfectly sharp shadow edges.
-     *
-     * <p>Use this image as the <b>before</b> reference when comparing with
-     * {@link #testSoftShadowsOn()}.</p>
-     */
     @Test
     void testSoftShadowsOff() {
         Scene scene = buildScene(false);
-
         long start = System.currentTimeMillis();
 
         Camera.getBuilder()
                 .setLocation(new Point(0, 80, 350))
-                .setDirection(new Point(0, -10, 0), new Vector(0, 1, 0))
+                .setDirection(new Point(0, 0, 0), new Vector(0, 1, 0))
                 .setVpSize(200, 200)
                 .setVpDistance(250)
                 .setResolution(RESOLUTION, RESOLUTION)
                 .setRayTracer(scene, RayTracerType.SIMPLE)
-                // Multi-threading enabled for both tests so render time difference
-                // reflects only the cost of soft shadows, not single vs multi thread
                 .setMultithreading(-2)
                 .setDebugPrint(5)
                 .build()
@@ -150,23 +101,14 @@ class SuperSamplingTests {
     //  Tests — with improvement (soft shadows)
     // ──────────────────────────────────────────────────────────────────────────
 
-    /**
-     * Renders the showcase scene with area lights (size &gt; 0), producing soft
-     * shadow edges with realistic umbra / penumbra transitions.
-     *
-     * <p>Uses {@value #SHADOW_SAMPLES} shadow samples per light ({@code DEFAULT_SHADOW_SAMPLES}
-     * in {@code SimpleRayTracer}). The render time will be noticeably longer than
-     * {@link #testSoftShadowsOff()} due to the additional shadow rays.</p>
-     */
     @Test
     void testSoftShadowsOn() {
         Scene scene = buildScene(true);
-
         long start = System.currentTimeMillis();
 
         Camera.getBuilder()
                 .setLocation(new Point(0, 80, 350))
-                .setDirection(new Point(0, -10, 0), new Vector(0, 1, 0))
+                .setDirection(new Point(0, 0, 0), new Vector(0, 1, 0))
                 .setVpSize(200, 200)
                 .setVpDistance(250)
                 .setResolution(RESOLUTION, RESOLUTION)
@@ -179,143 +121,105 @@ class SuperSamplingTests {
 
         long elapsed = System.currentTimeMillis() - start;
         System.out.printf("[ON]  Render time: %.2f seconds%n", elapsed / 1000.0);
-        System.out.printf("      (%d shadow samples per light, %d lights)%n",
-                SHADOW_SAMPLES, 3);
+        System.out.printf("      (%d shadow samples per light, %d lights)%n", SHADOW_SAMPLES, 3);
     }
 
     // ──────────────────────────────────────────────────────────────────────────
-    //  Scene builder
+    //  Scene builder (Abstract Geometry Garden)
     // ──────────────────────────────────────────────────────────────────────────
 
-    /**
-     * Builds "The Gallery" scene: 11 geometric bodies and 3 light sources.
-     *
-     * <p>The only difference between the two tests is the {@code softShadows} flag.
-     * When {@code true}, each light source receives a non-zero size via
-     * {@link PointLight#setSize(double)} / {@link SpotLight#setSize(double)},
-     * enabling area-light soft-shadow sampling in {@code SimpleRayTracer}.</p>
-     *
-     * <h4>Geometry list</h4>
-     * <ol>
-     *   <li>Floor (Plane, y = −80)</li>
-     *   <li>Back wall (Plane, z = −200)</li>
-     *   <li>Left wall (Plane, x = −160)</li>
-     *   <li>Large central sphere — metallic</li>
-     *   <li>Medium sphere, left — blue glass</li>
-     *   <li>Small sphere, right — red opaque</li>
-     *   <li>Small sphere, back — green opaque</li>
-     *   <li>Tall cylinder (pillar), far left</li>
-     *   <li>Short cylinder (pedestal), centre-right</li>
-     *   <li>Decorative triangle, on floor left</li>
-     *   <li>Decorative triangle, on floor right</li>
-     * </ol>
-     *
-     * <h4>Light list</h4>
-     * <ol>
-     *   <li>Main overhead {@link PointLight} — warm white, large area</li>
-     *   <li>Left fill {@link PointLight} — cool blue, medium area</li>
-     *   <li>Right accent {@link SpotLight} — warm yellow, tight cone</li>
-     * </ol>
-     *
-     * @param softShadows {@code true} to assign a non-zero size to each light
-     *                    (area light → soft shadows); {@code false} for point
-     *                    lights with size 0 (hard shadows)
-     * @return the fully configured scene ready for rendering
-     */
     private Scene buildScene(boolean softShadows) {
-        Scene scene = new Scene("The Gallery")
-                .setAmbientLight(new AmbientLight(new Color(10, 10, 13)));
+        Scene scene = new Scene("Abstract Geometry Garden")
+                .setAmbientLight(new AmbientLight(new Color(15, 15, 20)));
 
-        // ── Geometry 1: Floor ─────────────────────────────────────────────────
+        // ── 1. Floor (Plane) ─────────────────────────────────────────────────
         scene.geometries.add(
-                new Plane(new Point(0, -80, 0), new Vector(0, 1, 0))
-                        .setEmission(new Color(30, 30, 30))
+                new Plane(new Point(0, -50, 0), new Vector(0, 1, 0))
+                        .setEmission(new Color(20, 25, 30))
                         .setMaterial(FLOOR_MAT)
         );
 
-        // ── Geometry 2: Back wall ─────────────────────────────────────────────
+        // ── 2. Back wall (Plane) ─────────────────────────────────────────────
         scene.geometries.add(
-                new Plane(new Point(0, 0, -200), new Vector(0, 0, 1))
-                        .setEmission(new Color(40, 40, 50))
+                new Plane(new Point(0, 0, -250), new Vector(0, 0, 1))
+                        .setEmission(new Color(10, 10, 15))
                         .setMaterial(WALL_MAT)
         );
 
-        // ── Geometry 3: Left wall ─────────────────────────────────────────────
+        // ── 3. Central Pedestal (Cylinder) ───────────────────────────────────
         scene.geometries.add(
-                new Plane(new Point(-160, 0, 0), new Vector(1, 0, 0))
-                        .setEmission(new Color(50, 40, 40))
+                new Cylinder(30, new Ray(new Point(0, -50, 0), new Vector(0, 1, 0)), 15)
+                        .setEmission(new Color(40, 40, 40))
                         .setMaterial(WALL_MAT)
         );
 
-        // ── Geometry 4: Large central sphere — metallic mirror ────────────────
+        // ── 4. Main Focus (Sphere) - Resting on the pedestal ─────────────────
         scene.geometries.add(
-                new Sphere(new Point(0, -20, -60), 60)
-                        .setEmission(new Color(40, 40, 45))
-                        .setMaterial(METAL_MAT)
-        );
-
-        // ── Geometry 5: Medium sphere, left — blue glass ──────────────────────
-        scene.geometries.add(
-                new Sphere(new Point(-90, -55, -30), 25)
-                        .setEmission(new Color(10, 20, 80))
+                new Sphere(new Point(0, 5, 0), 40)
+                        .setEmission(new Color(5, 20, 40))
                         .setMaterial(GLASS_MAT)
         );
 
-        // ── Geometry 6: Small sphere, right — red opaque ──────────────────────
+        // ── 5. Orbiting Mirror (Sphere) - Floating left ──────────────────────
         scene.geometries.add(
-                new Sphere(new Point(90, -65, 10), 15)
-                        .setEmission(new Color(160, 20, 20))
-                        .setMaterial(RED_MAT)
+                new Sphere(new Point(-65, 20, 40), 18)
+                        .setEmission(new Color(0, 0, 0))
+                        .setMaterial(MIRROR_MAT)
         );
 
-        // ── Geometry 7: Small sphere, back — green ────────────────────────────
+        // ── 6. Sweeping Background Pipe (Tube) ───────────────────────────────
         scene.geometries.add(
-                new Sphere(new Point(40, -68, -130), 12)
-                        .setEmission(new Color(20, 130, 30))
-                        .setMaterial(GREEN_MAT)
+                new Tube(6, new Ray(new Point(-150, -20, -100), new Vector(1, 0.4, 0)))
+                        .setEmission(new Color(10, 100, 100))
+                        .setMaterial(MATTE_CYAN_MAT)
         );
 
-        // ── Geometry 8: Tall cylinder (pillar), far left ──────────────────────
+        // ── Floating Pyramid on the right (Triangles 7, 8, 9) ────────────────
+        Point pApex = new Point(80, 50, 20);
+        Point pBase1 = new Point(60, -10, 40);
+        Point pBase2 = new Point(100, -10, 40);
+        Point pBase3 = new Point(80, -10, -10);
+
         scene.geometries.add(
-                new Cylinder(12,
-                        new Ray(new Point(-120, -80, -100), new Vector(0, 1, 0)),
-                        130)
-                        .setEmission(new Color(140, 130, 100))
-                        .setMaterial(GOLD_MAT)
+                // 7. Pyramid Front Face
+                new Triangle(pApex, pBase1, pBase2)
+                        .setEmission(new Color(150, 60, 10))
+                        .setMaterial(GLOSSY_ORANGE_MAT),
+                // 8. Pyramid Left Face
+                new Triangle(pApex, pBase1, pBase3)
+                        .setEmission(new Color(120, 40, 10))
+                        .setMaterial(GLOSSY_ORANGE_MAT),
+                // 9. Pyramid Right Face
+                new Triangle(pApex, pBase2, pBase3)
+                        .setEmission(new Color(180, 80, 20))
+                        .setMaterial(GLOSSY_ORANGE_MAT)
         );
 
-        // ── Geometry 9: Short cylinder (pedestal), centre-right ───────────────
+        // ── 10. Small floating sphere inside/near the pyramid ────────────────
         scene.geometries.add(
-                new Cylinder(20,
-                        new Ray(new Point(80, -80, -80), new Vector(0, 1, 0)),
-                        30)
-                        .setEmission(new Color(160, 160, 160))
-                        .setMaterial(WHITE_MAT)
+                new Sphere(new Point(80, 10, 15), 10)
+                        .setEmission(new Color(100, 20, 150))
+                        .setMaterial(GLOSSY_PURPLE_MAT)
         );
 
-        // ── Geometry 10: Decorative triangle on floor, left ───────────────────
+        // ── 11. Left Column (Cylinder) ───────────────────────────────────────
         scene.geometries.add(
-                new Triangle(
-                        new Point(-60, -79, 20),
-                        new Point(-20, -79, 60),
-                        new Point(-100, -79, 70))
-                        .setEmission(new Color(100, 30, 120))
-                        .setMaterial(PURPLE_MAT)
+                new Cylinder(12, new Ray(new Point(-100, -50, -50), new Vector(0, 1, 0)), 60)
+                        .setEmission(new Color(20, 150, 150))
+                        .setMaterial(MATTE_CYAN_MAT)
         );
 
-        // ── Geometry 11: Decorative triangle on floor, right ─────────────────
+        // ── 12. Red Matte Sphere resting on the floor front-left ─────────────
         scene.geometries.add(
-                new Triangle(
-                        new Point(50, -79, 40),
-                        new Point(120, -79, 20),
-                        new Point(100, -79, 90))
-                        .setEmission(new Color(180, 120, 10))
-                        .setMaterial(GOLD_MAT)
+                new Sphere(new Point(-40, -35, 80), 15)
+                        .setEmission(new Color(180, 20, 20))
+                        .setMaterial(WALL_MAT) // Using matte wall material
         );
 
-        // ── Lights ────────────────────────────────────────────────────────────
 
-        // Light 1: Main overhead — warm white, large area for wide penumbra
+        // ── Lights (Unchanged to maintain the specific shadow layout) ────────
+
+        // Light 1: Main overhead
         PointLight mainLight = new PointLight(
                 new Color(150, 140, 120),
                 new Point(0, 180, -50))
@@ -323,7 +227,7 @@ class SuperSamplingTests {
         if (softShadows) mainLight.setSize(MAIN_LIGHT_SIZE);
         scene.lights.add(mainLight);
 
-        // Light 2: Left fill — cool blue, medium area for coloured soft shadow
+        // Light 2: Left fill
         PointLight fillLight = new PointLight(
                 new Color(50, 60, 130),
                 new Point(-180, 100, 80))
@@ -331,7 +235,7 @@ class SuperSamplingTests {
         if (softShadows) fillLight.setSize(FILL_LIGHT_SIZE);
         scene.lights.add(fillLight);
 
-        // Light 3: Right accent — warm yellow spotlight, tight cone with soft edge
+        // Light 3: Right accent
         SpotLight accentLight = new SpotLight(
                 new Color(200, 150, 40),
                 new Point(200, 150, 100),
@@ -341,7 +245,7 @@ class SuperSamplingTests {
         if (softShadows) accentLight.setSize(ACCENT_LIGHT_SIZE);
         scene.lights.add(accentLight);
 
-        // Light 4 (bonus): Directional background light — always hard shadow (size = 0)
+        // Light 4 (bonus): Directional background light (Hard shadow always)
         scene.lights.add(
                 new DirectionalLight(new Color(12, 12, 20), new Vector(1, -0.5, -1))
         );
