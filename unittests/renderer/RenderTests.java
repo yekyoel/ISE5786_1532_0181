@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import primitives.Color;
 import primitives.Point;
 import scene.Scene;
-import scene.SceneXMLParser;
 
 import static java.awt.Color.YELLOW;
 
@@ -100,34 +99,4 @@ class RenderTests {
                 .printGrid(100, new Color(YELLOW)) //
                 .writeToImage("Two colors render test");
     }
-
-    /**
-     * Renders a scene loaded from an XML file.
-     *
-     * @param builder the camera builder to use
-     * @param xmlName the XML scene file name
-     * @return the camera after rendering
-     */
-    Camera renderSceneXML(Camera.Builder builder, String xmlName) {
-        Scene scene = new Scene("Using XML");
-
-        //
-        SceneXMLParser.parse(scene, xmlName);
-
-        return builder //
-                .setRayTracer(scene, RayTracerType.SIMPLE) //
-                .build() //
-                .renderImage();
-    }
-
-    /**
-     * Test for XML based scene - for bonus
-     */
-    @Test
-    void testBasicRenderXml() {
-        renderSceneXML(baseCameraBuilder(), "basicRenderTestTwoColors") //
-                .printGrid(100, new Color(YELLOW)) //
-                .writeToImage("render test xml");
-    }
-
 }

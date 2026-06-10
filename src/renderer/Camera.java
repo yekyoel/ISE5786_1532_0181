@@ -17,55 +17,84 @@ import static primitives.Util.isZero;
  * It uses the Builder design pattern for construction.
  */
 public class Camera implements Cloneable {
-    /** Camera origin point. */
+    /**
+     * Camera origin point.
+     */
     private Point p0;
-    /** Forward direction vector. */
+    /**
+     * Forward direction vector.
+     */
     private Vector vTo;
-    /** Up direction vector. */
+    /**
+     * Up direction vector.
+     */
     private Vector vUp;
-    /** Right direction vector (orthogonal basis). */
+    /**
+     * Right direction vector (orthogonal basis).
+     */
     private Vector vRight;
-    /** Image writer used to store rendered pixels. */
+    /**
+     * Image writer used to store rendered pixels.
+     */
     private ImageWriter imageWriter;
-    /** Active ray tracer implementation. */
+    /**
+     * Active ray tracer implementation.
+     */
     private RayTracerBase rayTracer;
 
-    /** View-plane width. */
+    /**
+     * View-plane width.
+     */
     private double width;
-    /** View-plane height. */
+    /**
+     * View-plane height.
+     */
     private double height;
-    /** Distance from camera origin to view plane. */
+    /**
+     * Distance from camera origin to view plane.
+     */
     private double distance;
 
-    /** Horizontal resolution in pixels. */
+    /**
+     * Horizontal resolution in pixels.
+     */
     private int nX = 1;
-    /** Vertical resolution in pixels. */
+    /**
+     * Vertical resolution in pixels.
+     */
     private int nY = 1;
 
-    /** Calculated center point of the view plane. */
+    /**
+     * Calculated center point of the view plane.
+     */
     private Point vpCenter;
-    /** Calculated width of one pixel in world units. */
+    /**
+     * Calculated width of one pixel in world units.
+     */
     private double pixelWidth;
-    /** Calculated height of one pixel in world units. */
+    /**
+     * Calculated height of one pixel in world units.
+     */
     private double pixelHeight;
 
     /**
      * Rendering mode selector: {@code 0} = single-thread, {@code -1} = parallel stream,
      * positive values = explicit raw-thread count, {@code -2} = auto raw-thread count.
      */
-    private int _threadsCount=0;
+    private int _threadsCount = 0;
     /**
      * Number of CPU cores to keep free when auto-selecting raw worker threads.
      */
-    private static final int SPARE_THREADS=2;
+    private static final int SPARE_THREADS = 2;
     /**
      * Progress-print interval in seconds; {@code 0} disables periodic progress output.
      */
-    private double _printInterval=0;
+    private double _printInterval = 0;
     /**
      * Helper that tracks remaining pixels and optionally reports rendering progress.
      */
     private PixelManager pixelManager;
+
     /**
      * Private default constructor to prevent direct instantiation without Builder.
      */
@@ -194,6 +223,7 @@ public class Camera implements Cloneable {
         Ray ray = constructRay(j, i);
         Color color = rayTracer.traceRay(ray);
         imageWriter.writePixel(j, i, color);
+        pixelManager.pixelDone();
     }
 
     /**
@@ -233,14 +263,22 @@ public class Camera implements Cloneable {
         public Builder() {
         }
 
-        /** The camera being configured by this builder. */
+        /**
+         * The camera being configured by this builder.
+         */
         private final Camera camera = new Camera();
 
-        /** Explicit forward direction, used when the builder is configured by vector. */
+        /**
+         * Explicit forward direction, used when the builder is configured by vector.
+         */
         private Vector to;
-        /** Look-at target point, used when the builder is configured by point. */
+        /**
+         * Look-at target point, used when the builder is configured by point.
+         */
         private Point target;
-        /** Up vector used to construct the camera basis; defaults to {@link Vector#AXIS_Y}. */
+        /**
+         * Up vector used to construct the camera basis; defaults to {@link Vector#AXIS_Y}.
+         */
         private Vector up = Vector.AXIS_Y;
 
         /**
