@@ -173,7 +173,7 @@ public class RegularGrid extends Intersectable {
 
             if (!voxelGeometries.isEmpty()) {
                 for (Intersectable geo : voxelGeometries) {
-                    var hits = geo.calcIntersections(ray, Math.min(maxDistance, cellNextT));
+                    var hits = geo.calcIntersections(ray, maxDistance);
                     if (hits != null) {
                         if (finiteIntersections == null) finiteIntersections = new LinkedList<>();
                         finiteIntersections.addAll(hits);

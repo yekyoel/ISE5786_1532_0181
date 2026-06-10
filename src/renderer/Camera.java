@@ -179,6 +179,7 @@ public class Camera implements Cloneable {
         IntStream.range(0, nY).parallel()
                 .forEach(i -> IntStream.range(0, nX).parallel()
                         .forEach(j -> {
+                            castRay(j, i);
                             pixelManager.pixelDone();
                         }));
         return this;
