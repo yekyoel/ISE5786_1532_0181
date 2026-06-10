@@ -120,7 +120,7 @@ public abstract class Intersectable {
     /**
      * Calculate intersections of a ray with this geometry up to a maximum distance.
      *
-     * @param ray the ray to check for intersections
+     * @param ray         the ray to check for intersections
      * @param maxDistance maximum distance to check for intersections
      * @return list of intersections
      */
@@ -132,9 +132,13 @@ public abstract class Intersectable {
      * Calculate intersections of a ray with this geometry up to a maximum distance.
      * This is the abstract method that subclasses must implement.
      *
-     * @param ray the ray to check for intersections
+     * @param ray         the ray to check for intersections
      * @param maxDistance maximum distance to check for intersections
      * @return list of intersections
      */
     protected abstract List<Intersection> calcIntersectionsHelper(Ray ray, double maxDistance);
+
+    public BoundingBox getBoundingBox() {
+        return null;
+    }
 }

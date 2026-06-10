@@ -137,4 +137,21 @@ public class Polygon extends Geometry {
         // We must wrap the point using 'this' (the Polygon), not the plane.
         return List.of(new Intersection(this, intersections.get(0).point));
     }
+
+    @Override
+    public geometries.api.BoundingBox getBoundingBox() {
+        double minX = Double.POSITIVE_INFINITY, minY = Double.POSITIVE_INFINITY, minZ = Double.POSITIVE_INFINITY;
+        double maxX = Double.NEGATIVE_INFINITY, maxY = Double.NEGATIVE_INFINITY, maxZ = Double.NEGATIVE_INFINITY;
+        for (primitives.Point p : _vertices) {
+            if (p.getX() < minX) minX = p.getX();
+            if (p.getX() > maxX) maxX = p.getX();
+            if (p.getY() < minY) minY = p.getY();
+            if (p.getY() > maxY) maxY = p.getY();
+            if (p.getZ() < minZ) minZ = p.getZ();
+            if (p.getZ() > maxZ) maxZ = p.getZ();
+        }
+        return new geometries.api.BoundingBox(
+                new primitives.Point(minX, minY, minZ), new primitives.Point(maxX, maxY, maxZ)
+        );
+    }
 }

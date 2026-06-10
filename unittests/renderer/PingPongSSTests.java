@@ -98,7 +98,7 @@ class PingPongSSTests {
      * @param softShadows {@code true} for area lights, {@code false} for hard shadows
      * @return a fully configured scene ready to render
      */
-    private Scene buildPingPongScene(boolean softShadows) {
+    public Scene buildPingPongScene(boolean softShadows) {
         // 1. Initialize Scene & "Sky" Background
         Scene scene = new Scene("Ping Pong Match");
         scene.setBackground(new Color(135, 206, 235)); // Sky Blue background

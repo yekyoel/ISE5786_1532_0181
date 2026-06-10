@@ -67,4 +67,29 @@ public class Geometries extends Intersectable {
         }
         return result;
     }
+
+    public List<Intersectable> getChildren() {
+        return this.geometries;
+    }
+
+    @Override
+    public geometries.api.BoundingBox getBoundingBox() {
+        if (geometries.isEmpty()) return null;
+        double minX = Double.POSITIVE_INFINITY, minY = Double.POSITIVE_INFINITY, minZ = Double.POSITIVE_INFINITY;
+        double maxX = Double.NEGATIVE_INFINITY, maxY = Double.NEGATIVE_INFINITY, maxZ = Double.NEGATIVE_INFINITY;
+        boolean hasBox = false;
+        for (Intersectable item : geometries) {
+            var box = item.getBoundingBox();
+            if (box != null) {
+                hasBox = true;
+                if (box.min.getX() < minX) minX = box.min.getX();
+                if (box.min.getY() < minY) minY = box.min.getY();
+                if (box.min.getZ() < minZ) minZ = box.min.getZ();
+                if (box.max.getX() > maxX) maxX = box.max.getX();
+                if (box.max.getY() > maxY) maxY = box.max.getY();
+                if (box.max.getZ() > maxZ) maxZ = box.max.getZ();
+            }
+        }
+        return hasBox ? new geometries.api.BoundingBox(new primitives.Point(minX, minY, minZ), new primitives.Point(maxX, maxY, maxZ)) : null;
+    }
 }

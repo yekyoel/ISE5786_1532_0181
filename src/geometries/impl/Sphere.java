@@ -83,4 +83,12 @@ public class Sphere extends RadialGeometry {
         }
         return null;
     }
+
+    @Override
+    public geometries.api.BoundingBox getBoundingBox() {
+        return new geometries.api.BoundingBox(
+                new primitives.Point(_center.getX() - _radius, _center.getY() - _radius, _center.getZ() - _radius),
+                new primitives.Point(_center.getX() + _radius, _center.getY() + _radius, _center.getZ() + _radius)
+        );
+    }
 }
