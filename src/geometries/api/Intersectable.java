@@ -138,6 +138,11 @@ public abstract class Intersectable {
      */
     protected abstract List<Intersection> calcIntersectionsHelper(Ray ray, double maxDistance);
 
+    /**
+     * Returns the axis-aligned bounding box for this geometry, if it has one.
+     *
+     * @return the bounding box, or {@code null} for unbounded geometries
+     */
     public BoundingBox getBoundingBox() {
         return null;
     }

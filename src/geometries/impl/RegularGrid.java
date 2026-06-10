@@ -9,12 +9,28 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Regular 3D grid accelerator for intersectable geometries.
+ */
 public class RegularGrid extends Intersectable {
+    /** Scene bounds padded for voxel traversal. */
     private final BoundingBox sceneBox;
-    private int Nx, Ny, Nz;
+    /** Number of voxels along the X axis. */
+    private int Nx;
+    /** Number of voxels along the Y axis. */
+    private int Ny;
+    /** Number of voxels along the Z axis. */
+    private int Nz;
+    /** Per-voxel geometry buckets. */
     private List<Intersectable>[][][] grid;
+    /** Geometries that do not provide a bounding box. */
     private final List<Intersectable> infiniteGeometries = new ArrayList<>();
 
+    /**
+     * Builds a regular grid from the supplied scene geometries.
+     *
+     * @param sceneGeometries the scene composite to accelerate
+     */
     @SuppressWarnings("unchecked")
     public RegularGrid(Geometries sceneGeometries) {
         List<Intersectable> finiteGeometries = new ArrayList<>();
@@ -85,6 +101,12 @@ public class RegularGrid extends Intersectable {
         }
     }
 
+    /**
+     * Flattens nested composites into finite and infinite geometry buckets.
+     *
+     * @param current the current geometry or composite node
+     * @param target the target list for finite geometries
+     */
     private void extractGeometries(Intersectable current, List<Intersectable> target) {
         if (current instanceof Geometries composite) {
             for (Intersectable child : composite.getChildren()) {
@@ -96,11 +118,23 @@ public class RegularGrid extends Intersectable {
         }
     }
 
+    /**
+     * Maps a coordinate into a voxel index.
+     *
+     * @param val the coordinate value
+     * @param min the axis minimum
+     * @param max the axis maximum
+     * @param res the number of voxels on that axis
+     * @return the clamped voxel index
+     */
     private int getVoxelCoord(double val, double min, double max, int res) {
         int cell = (int) (((val - min) / (max - min)) * res);
         return Math.max(0, Math.min(res - 1, cell));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected List<Intersection> calcIntersectionsHelper(Ray ray, double maxDistance) {
         List<Intersection> infiniteIntersections = null;

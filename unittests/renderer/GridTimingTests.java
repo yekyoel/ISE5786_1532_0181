@@ -39,13 +39,18 @@ class GridTimingTests {
      */
     private static final int RESOLUTION = 600;
 
-    /**
-     * Soft-shadow samples on every area light.
-     */
+    /** Radius of the main overhead point light. */
     private static final double MAIN_LIGHT_SIZE = 18;
+    /** Radius of the left fill point light. */
     private static final double FILL_LIGHT_SIZE = 12;
+    /** Radius of the right accent spot light. */
     private static final double RIM_LIGHT_SIZE = 8;
+    /** Radius of the rear rim spot light. */
     private static final double ACCENT_LIGHT_SIZE = 6;
+
+    /** Default constructor for the JUnit test class. */
+    GridTimingTests() {
+    }
 
     // ── Materials ─────────────────────────────────────────────────────────────
 

@@ -35,16 +35,31 @@ public class Point {
     }
 
 
+    /**
+     * Returns the X coordinate.
+     *
+     * @return _xyz
+     */
     public double getX() {
         return _xyz._d1();
     }
 
+    /**
+     * Returns the Y coordinate.
+     *
+     * @return _xyz
+     */
     public double getY() {
-        return _xyz._d1();
+        return _xyz._d2();
     }
 
+    /**
+     * Returns the Z coordinate.
+     *
+     * @return _xyz
+     */
     public double getZ() {
-        return _xyz._d1();
+        return _xyz._d3();
     }
 
     /**

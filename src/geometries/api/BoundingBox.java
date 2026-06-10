@@ -8,9 +8,17 @@ import primitives.Util;
  * Axis-Aligned Bounding Box (AABB) for spatial partitioning acceleration.
  */
 public class BoundingBox {
+    /** Lower corner of the box. */
     public final Point min;
+    /** Upper corner of the box. */
     public final Point max;
 
+    /**
+     * Creates a bounding box from its lower and upper corners.
+     *
+     * @param min the minimum corner
+     * @param max the maximum corner
+     */
     public BoundingBox(Point min, Point max) {
         this.min = min;
         this.max = max;
@@ -19,6 +27,8 @@ public class BoundingBox {
     /**
      * Slabs algorithm for fast ray-box intersection.
      *
+     * @param ray the ray to test
+     * @param maxDistance the farthest accepted hit distance
      * @return The tMin (distance to entry point), or -1.0 if no valid intersection.
      */
     public double intersect(Ray ray, double maxDistance) {

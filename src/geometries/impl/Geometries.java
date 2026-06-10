@@ -68,6 +68,11 @@ public class Geometries extends Intersectable {
         return result;
     }
 
+    /**
+     * Returns the direct children stored in this composite geometry.
+     *
+     * @return the backing list of child geometries
+     */
     public List<Intersectable> getChildren() {
         return this.geometries;
     }

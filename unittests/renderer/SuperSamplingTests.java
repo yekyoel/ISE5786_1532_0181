@@ -17,7 +17,7 @@ import scene.Scene;
  * the only difference is whether {@link PointLight#setSize(double)} and
  * {@link SpotLight#setSize(double)} are called on the light sources.</p>
  *
- * <p>Requirements satisfied:
+ * <p>Requirements satisfied:</p>
  * <ul>
  * <li>≥ 10 distinct geometric bodies</li>
  * <li>≥ 3 light sources at different positions</li>
@@ -26,7 +26,6 @@ import scene.Scene;
  * <li>Distinct output file names for easy visual comparison</li>
  * <li>Console render-time output for both runs</li>
  * </ul>
- * </p>
  */
 class SuperSamplingTests {
 
@@ -43,38 +42,48 @@ class SuperSamplingTests {
     /** Number of shadow-beam samples per light when soft shadows are enabled. */
     private static final int SHADOW_SAMPLES = 81;
 
-    /** Radius sizes for the area lights (enabled only in the "ON" test). */
+    /** Radius of the main area light when soft shadows are enabled. */
     private static final double MAIN_LIGHT_SIZE   = 15;
+    /** Radius of the fill light when soft shadows are enabled. */
     private static final double FILL_LIGHT_SIZE   = 10;
+    /** Radius of the accent light when soft shadows are enabled. */
     private static final double ACCENT_LIGHT_SIZE = 8;
 
     // ── Materials ──────────────────────────────────────────────────────────────
 
+    /** Semi-reflective floor material. */
     private static final Material FLOOR_MAT = new Material()
-            .setKd(0.5).setKs(0.5).setShininess(60).setKr(0.2); // Semi-reflective floor
+            .setKd(0.5).setKs(0.5).setShininess(60).setKr(0.2);
 
+    /** Matte backdrop material. */
     private static final Material WALL_MAT = new Material()
-            .setKd(0.8).setKs(0.1).setShininess(10); // Matte backdrop
+            .setKd(0.8).setKs(0.1).setShininess(10);
 
+    /** Highly transparent glass material. */
     private static final Material GLASS_MAT = new Material()
-            .setKd(0.1).setKs(0.8).setShininess(200).setKt(0.85).setKr(0.1); // Highly transparent
+            .setKd(0.1).setKs(0.8).setShininess(200).setKt(0.85).setKr(0.1);
 
+    /** Mirror-like material. */
     private static final Material MIRROR_MAT = new Material()
-            .setKd(0.1).setKs(0.8).setShininess(200).setKr(0.85); // Perfect mirror
+            .setKd(0.1).setKs(0.8).setShininess(200).setKr(0.85);
 
+    /** Flat cyan material. */
     private static final Material MATTE_CYAN_MAT = new Material()
-            .setKd(0.7).setKs(0.1).setShininess(10); // Flat cyan
+            .setKd(0.7).setKs(0.1).setShininess(10);
 
+    /** Shiny orange material. */
     private static final Material GLOSSY_ORANGE_MAT = new Material()
-            .setKd(0.5).setKs(0.6).setShininess(80); // Shiny plastic orange
+            .setKd(0.5).setKs(0.6).setShininess(80);
 
+    /** Shiny purple material. */
     private static final Material GLOSSY_PURPLE_MAT = new Material()
-            .setKd(0.6).setKs(0.5).setShininess(70); // Shiny plastic purple
+            .setKd(0.6).setKs(0.5).setShininess(70);
 
     // ──────────────────────────────────────────────────────────────────────────
     //  Tests — without improvement (hard shadows)
     // ──────────────────────────────────────────────────────────────────────────
 
+    /** Renders the reference scene without soft shadows. */
     @Test
     void testSoftShadowsOff() {
         Scene scene = buildScene(false);
@@ -101,6 +110,7 @@ class SuperSamplingTests {
     //  Tests — with improvement (soft shadows)
     // ──────────────────────────────────────────────────────────────────────────
 
+    /** Renders the reference scene with soft shadows enabled. */
     @Test
     void testSoftShadowsOn() {
         Scene scene = buildScene(true);
@@ -128,6 +138,12 @@ class SuperSamplingTests {
     //  Scene builder (Abstract Geometry Garden)
     // ──────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Builds the scene used by both comparison renders.
+     *
+     * @param softShadows whether the area lights should use their larger radii
+     * @return the constructed scene
+     */
     private Scene buildScene(boolean softShadows) {
         Scene scene = new Scene("Abstract Geometry Garden")
                 .setAmbientLight(new AmbientLight(new Color(15, 15, 20)));
